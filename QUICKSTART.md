@@ -55,6 +55,7 @@ If you already installed project-scoped and want to switch: `/plugin uninstall <
 | Clinic supervisor (law school) | `legal-clinic` | `/legal-clinic:cold-start-interview` |
 | Law student | `law-student` | `/law-student:cold-start-interview` |
 | Legal ops / looking for skills | `legal-builder-hub` | `/legal-builder-hub:registry-browser` |
+| Record clearance clinic or legal aid staff | `record-clearance-legal` | `/record-clearance-legal:cold-start-interview` |
 
 ## What you're installing
 

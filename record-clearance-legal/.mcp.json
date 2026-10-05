@@ -1,0 +1,41 @@
+{
+  "mcpServers": {
+    "Slack": {
+      "type": "http",
+      "url": "https://mcp.slack.com/mcp",
+      "title": "Slack",
+      "description": "Search messages, read channels, post a screening summary to the attorney review channel."
+    },
+    "Google Drive": {
+      "type": "http",
+      "url": "https://drivemcp.googleapis.com/mcp/v1",
+      "title": "Google Drive",
+      "description": "Read intake exports, consent texts and referral lists stored in Drive."
+    },
+    "CourtListener": {
+      "type": "http",
+      "url": "https://mcp.courtlistener.com/",
+      "title": "CourtListener",
+      "description": "Free Law Project's legal research platform; used to verify statute and case citations when connected."
+    },
+    "Typeform": {
+      "type": "http",
+      "url": "https://api.typeform.com/mcp",
+      "title": "Typeform",
+      "description": "Read intake form definitions and responses (read-only use in this plugin)."
+    },
+    "Airtable": {
+      "type": "http",
+      "url": "https://mcp.airtable.com/mcp",
+      "title": "Airtable",
+      "description": "Read intake records from the clinic's intake base (read-only use in this plugin)."
+    }
+  },
+  "recommendedCategories": [
+    "forms",
+    "database",
+    "documents",
+    "legal-research",
+    "chat"
+  ]
+}

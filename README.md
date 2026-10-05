@@ -124,6 +124,8 @@ Each agent is named for the workflow it runs. They're the most common surface �
 | **Community Skill Recommender** | Suggest community skills based on recent activity in other plugins | `legal-builder-hub` | `/legal-builder-hub:related-skills-surfacer` |
 | **Community Skill Updater** | Check for updates to installed community skills | `legal-builder-hub` | `/legal-builder-hub:auto-updater` |
 | **Registry Sync** | Periodic check of watched registries for new and updated skills | `legal-builder-hub` | scheduled agent |
+| **Eligibility Screener** | Bands a record clearance intake against PC 1203.4 and PC 1203.41 with attorney-review triggers, recheck dates, and an automatic-relief flag | `record-clearance-legal` | `/record-clearance-legal:eligibility-screen` |
+| **Intake Importer** | Normalizes a pasted, CSV, Typeform or Airtable intake into one record and drops identifiers at import | `record-clearance-legal` | `/record-clearance-legal:intake-import` |
 
 For Managed Agent deployment — `agent.yaml`, leaf-worker subagents, steering-event examples, and per-agent security notes — see **[managed-agent-cookbooks/](./managed-agent-cookbooks)**.
 
@@ -142,6 +144,7 @@ litigation-legal/         # portfolio, matters, holds, demands, depo prep, claim
 legal-clinic/             # clinic setup, student ramp, intake, deadlines, memos, handoffs
 law-student/              # Socratic drilling, outlining, IRAC, bar prep, flashcards
 legal-builder-hub/        # community skill discovery and install with a trust gate
+record-clearance-legal/   # record clearance intake import and statute-level eligibility screening
 external_plugins/         # partner-built plugins maintained by their vendors
   cocounsel-legal/        # Thomson Reuters — Westlaw Deep Research via the CoCounsel Legal MCP
 managed-agent-cookbooks/  # Claude Managed Agent cookbooks — one dir per scheduled agent
@@ -263,6 +266,12 @@ Grouped by where the work sits. Each plugin's cold-start interview is what tailo
 | **[law-student](./law-student)** | Socratic drilling, case briefing, outline building, IRAC grading, cold-call prep, flashcards, bar prep, exam forecasting, study planning. **Learning mode, not answer mode** — it never writes the answer for you. |
 | **[legal-clinic](./legal-clinic)** | Professor setup and student semester ramp. Per-practice-area supervisor guide with pedagogy posture (assist / guide / teach). Structured intake with cross-area issue spotting. Deadline tracking with malpractice-aware caution. Memo scaffolds, client letters (routine + plain-language), semester handoffs. Built within ABA Formal Op. 512. |
 
+### Public interest
+
+| Plugin | What it adds |
+|---|---|
+| **[record-clearance-legal](./record-clearance-legal)** | For legal aid offices, public defender clean slate programs and clinics. Intake import that drops identifiers, then a statute-level screen of each conviction against PC 1203.4 and PC 1203.41 into likely eligible, not eligible yet (with a recheck date), needs attorney review, or automatic relief may apply. California card set in v0.1 with a hard stop elsewhere; adds Typeform and Airtable as the suite's first intake connectors. |
+
 ### Ecosystem
 
 | Plugin | What it adds |
@@ -323,6 +332,8 @@ These plugins ship connectors for the systems legal teams live in. A connector g
 | **Linear** | Launch tracker, issue tracking | `product-legal` | Customer workspace |
 | **Atlassian (Jira)** | Launch tracker, issue tracking | `product-legal` | Customer workspace |
 | **Asana** | Launch tracker, project tracking | `product-legal` | Customer workspace |
+| **Typeform** | Read intake forms and responses (read-only in the plugin) | `record-clearance-legal` | Your account; OAuth |
+| **Airtable** | Read intake records from an intake base (read-only in the plugin) | `record-clearance-legal` | Your account; OAuth |
 
 > Connectors marked "customer subscription" need the customer's own account and API key. Configure them in each plugin's `.mcp.json` or via `claude mcp` in your Claude Code setup.
 
@@ -554,6 +565,15 @@ The full map across all plugins. The cold-start interview is the first thing to 
 | `/law-student:exam-forecast` | exam-forecast | Analyze past exams to forecast likely emphases |
 | `/law-student:study-plan` | study-plan | Build or update a long-term study plan |
 | `/law-student:session` | study-plan | Run a focused N-question session; update the plan |
+
+### record-clearance-legal
+
+| Command | Skill | What it does |
+|---|---|---|
+| `/record-clearance-legal:cold-start-interview` | cold-start-interview | Supervising attorney setup — role gate, ethical preconditions, program gates, jurisdiction, review model, intake source |
+| `/record-clearance-legal:customize` | customize | Change one profile section without re-running setup |
+| `/record-clearance-legal:intake-import` | intake-import | Normalize a pasted, CSV, Typeform or Airtable intake; drop identifiers; ask for per-case facts |
+| `/record-clearance-legal:eligibility-screen` | eligibility-screen | Band each conviction against PC 1203.4 and PC 1203.41 with attorney-review triggers and recheck dates |
 
 ### cocounsel-legal (Thomson Reuters)
 
