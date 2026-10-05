@@ -23,10 +23,15 @@ This plugin pins every answer to a subdivision of the statute, flags every uncer
 
 | Command | What it does | What it doesn't do |
 |---|---|---|
-| `/record-clearance-legal:eligibility-screen` | Takes pasted intake answers, a normalized record, or a sentence or two about a conviction; with nothing, asks four to eight questions per conviction from memory. Drops names and contact details and says so. Before screening, lists the facts it will rely on as numbered yes-or-no lines and waits for a yes or a correction ("just screen" skips it). Screens against PC 1203.4, PC 1203.4a and PC 1203.41; names the route (mandatory, discretionary, split sentence, jail, prison) and whether a declaration is usually needed; bands each conviction; flags where PC 1203.425 automatic relief may already have acted; computes recheck dates with the arithmetic shown; for every item on a petition route, lists the county's forms and how the prosecutor is served. About 300 words for a clean one-case screen; `--full` gives the long form | Doesn't decide; doesn't read RAP sheets or documents; doesn't evaluate code-section lists, Proposition 47, Proposition 64 or PC 17(b); doesn't draft petitions; doesn't run outside California |
-| `/record-clearance-legal:intake-import` | Batch and connector tool: a CSV export row, or a Typeform or Airtable record, to the normalized intake record, with identifiers dropped and "I'm not sure" mapped to flags | Doesn't judge eligibility; doesn't ask for case facts (the screen does); doesn't write back to any form or base |
+| `/record-clearance-legal:eligibility-screen` | **Check 2**, with check 1 run inline on a paste. Takes pasted intake answers, a RAP sheet excerpt with identifiers removed, a normalized record, or a sentence or two about a conviction; with nothing, asks four to eight questions per conviction from memory. Drops names and contact details and says so. Before screening, lists the facts it will rely on as numbered yes-or-no lines and waits for a yes or a correction ("just screen" skips it). Screens against PC 1203.4, PC 1203.4a and PC 1203.41; names the route (mandatory, discretionary, split sentence, jail, prison) and whether a declaration is usually needed; bands each conviction; flags where PC 1203.425 automatic relief may already have acted; computes recheck dates with the arithmetic shown; for every item on a petition route, lists the county's forms and how the prosecutor is served. About 300 words for a clean one-case screen; `--full` gives the long form | Doesn't decide; doesn't read RAP sheets or documents; doesn't evaluate code-section lists, Proposition 47, Proposition 64 or PC 17(b); doesn't draft petitions; doesn't run outside California |
+| `/record-clearance-legal:intake-import` | **Check 1.** Imports an intake (paste, CSV row, Typeform or Airtable record) with identifiers dropped, then triages it with the routing a mature intake form carries: proceed to the screen, needs attorney review, not eligible now with a recheck, or not eligible for the program (gates, prior review, consents) | Doesn't band a conviction; doesn't ask for case facts (the screen does); doesn't write back to any form or base |
 | `/record-clearance-legal:cold-start-interview` | **Attorney.** One-time setup: role gate, jurisdiction, review model, intake source; the full path adds the ethical-preconditions record, program gates, referral targets and plain-language standards | Doesn't configure a screen for any state other than California in this version |
 | `/record-clearance-legal:customize` | Change one profile section without re-running setup | Doesn't remove the load-bearing guardrails |
+
+## Two checks
+
+1. **Intake triage.** From the intake answers alone: is this applicant worth an attorney's time now? Program gates, any prior review decision, pending case, supervision today and in the past three years with the fire camp exception, registration, trafficking or DV, and the five consents, in the order a mature intake form routes them. Outcomes: proceed to the screen, needs attorney review (a "not sure" on a field that matters), not eligible now (a wait, with the recheck), or not eligible for the program (with the referral step). Most intake forms collect these answers; this supplies the routing for any source.
+2. **Eligibility screen.** Per conviction, under PC 1203.4, 1203.4a and 1203.41, with the automatic relief flag, the recheck arithmetic and the county filing bullet. It runs when check 1 says proceed or review, and on request otherwise.
 
 ## What it screens
 
@@ -38,13 +43,13 @@ This plugin pins every answer to a subdivision of the statute, flags every uncer
 | PC 1203.425 automatic relief | flag only | the conditions from the statute; "check the RAP sheet for a relief granted note" |
 | Everything else (1203.4b fire camp, 1203.42, 17(b), Proposition 47, Proposition 64, 851.91 and 851.93 arrest sealing, certificates of rehabilitation, trafficking and DV vacatur, early termination of probation) | no | named in the report only when the facts raise it, with a short card and a referral line |
 
-Per-case bands need six facts per conviction: county, year, level, sentence type, probation grant and outcome, completion month. Most intake forms do not collect them, so the screen asks for what the paste left out, one or two questions at a time, and never for a document. With no case facts at all it runs the client-level gates and asks for the six.
+Per-case bands need six facts per conviction: county, year, offense type, sentence type and term, probation grant and outcome, sentencing month; when the actual end date is unknown the screen estimates it from the term and says so. Most intake forms do not collect them, so the screen asks for what the paste left out, one or two questions at a time, and never for a document. With no case facts at all it runs the client-level gates and asks for the six.
 
 The five band strings are `LIKELY ELIGIBLE`, `NOT ELIGIBLE NOW` (with a recheck date), `NEEDS ATTORNEY REVIEW`, `AUTOMATIC RELIEF MAY APPLY` (a flag on an item) and `NOT SCREENED`. The overall line inherits the strictest client-level result: one "I'm not sure" on a pending case makes every band provisional.
 
 ## What a screen looks like
 
-Short by default. First a verification checklist: the facts the screen will rely on, numbered, for a yes or a correction. Then the screen: the header, a one-line reviewer note, an overall line with the gates, one block per conviction (band, route, the facts that drove it, the flags), the next-step bullets, and a one-line decision tree. Empty sections are left out. `--full` gives the long form with the gate table, the per-item table and the five-option decision tree, for the attorney memo. `skills/eligibility-screen/references/report-template.md` has both forms and a rendered example.
+Short by default. First a verification checklist: the facts the screen will rely on, numbered, for a yes or a correction. Then the screen: the header, a one-line reviewer note, the check 1 triage line and the check 2 band line, one block per conviction (band, route, the facts that drove it, the flags), the next-step bullets, and a one-line decision tree. Empty sections are left out. `--full` gives the long form with the gate table, the per-item table and the five-option decision tree, for the attorney memo. `skills/eligibility-screen/references/report-template.md` has both forms and a rendered example.
 
 ## Filing guidance
 
@@ -56,7 +61,7 @@ Before using this plugin with real applicants, confirm with the supervising atto
 
 1. **Account tier and data handling.** Which Claude plan the program is on and what its retention and training terms say about client data.
 2. **AI-use practice.** Whether and how the program discloses AI-assisted screening to applicants, per ABA Formal Opinion 512 (2024), the state bar's guidance, and Rules of Professional Conduct 1.1, 1.4, 1.6 and 5.3.
-3. **RAP sheets and intake data.** RAP sheets, court records and identifiers never enter a session. Both the screen and the import step drop names, contact details, dates of birth, Social Security and CII numbers, registry dates and attachments, and keep initials or a clinic ID.
+3. **RAP sheets and intake data.** Full RAP sheets and court records never enter a session; a short excerpt of conviction lines with identifiers removed may be pasted as case facts. Both the screen and the import step drop names, contact details, dates of birth, Social Security, CII and case numbers, registry dates and attachments, and keep initials or a clinic ID.
 4. **Heightened sensitivity.** Criminal records, immigration exposure, registration status, and trafficking or domestic violence flags carry heightened confidentiality expectations. Decide whether any of these require extra safeguards or exclusion from the plugin.
 
 The full setup records these decisions as Part 0. The quick start asks one yes or no and writes a default that tells staff not to use the plugin on real applicants until the attorney confirms them.
@@ -93,7 +98,7 @@ The practice profile at `~/.claude/plugins/config/claude-for-legal/record-cleara
 
 ## Testing
 
-`references/sample-intakes/` holds eight synthetic fixtures and `EXPECTED.md`, the acceptance tests: exact band strings, the rules each report must mention, the flags it must raise, and the word caps. `evals/` holds the same tests as a `claude plugin eval` suite. From the plugin directory:
+`references/sample-intakes/` holds twelve synthetic fixtures and `EXPECTED.md`, the acceptance tests: exact band strings, the rules each report must mention, the flags it must raise, and the word caps. `evals/` holds the same tests as a `claude plugin eval` suite. From the plugin directory:
 
 ```
 claude plugin eval . --ablation none --no-publish --max-cost-usd 5
@@ -118,13 +123,13 @@ record-clearance-legal/
 ├── references/
 │   ├── currency-watch.md                  # statutes, last amendments, last-verified date
 │   ├── plain-language.md                  # staff explanations at a sixth-grade level
-│   └── sample-intakes/                    # eight synthetic fixtures and EXPECTED.md
+│   └── sample-intakes/                    # twelve synthetic fixtures and EXPECTED.md
 └── skills/
     ├── cold-start-interview/SKILL.md
     ├── customize/SKILL.md
     ├── intake-import/
     │   ├── SKILL.md
-    │   └── references/intake-schema.md, intake-flow.md
+    │   └── references/intake-schema.md, intake-flow.md, triage-rules.md
     └── eligibility-screen/
         ├── SKILL.md
         └── references/
@@ -138,7 +143,7 @@ record-clearance-legal/
 
 ## Sources and attribution
 
-Eligibility criteria are written from the current text of the California Penal Code, fetched and dated in `references/currency-watch.md` and on each card. Topic coverage of the plain-language material was informed by public legal information guides, including Root & Rebound's Roadmap to Reentry, and rewritten in fresh words; the statute text controls wherever they differ. The intake schema and reference flow are adapted from The Access Project's clean slate intake, with program-specific gates moved into configuration. Sample intakes are synthetic.
+Eligibility criteria are written from the current text of the California Penal Code, fetched and dated in `references/currency-watch.md` and on each card. Topic coverage of the plain-language material was informed by public legal information guides, including The Access Project's website content and Root & Rebound's Roadmap to Reentry; the statute text controls wherever they differ. The intake schema and reference flow are adapted from The Access Project's clean slate intake, with program-specific gates moved into configuration. Sample intakes are synthetic.
 
 ## Maintainer
 

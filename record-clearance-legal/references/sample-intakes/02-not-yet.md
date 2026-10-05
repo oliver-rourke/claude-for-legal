@@ -30,7 +30,7 @@ intake:
     - id: C1
       county: "Sample"
       conviction_year: 2017
-      offense_level: misdemeanor
+      offense_type: misdemeanor
       code_section: ""
       sentence: probation_only
       probation_granted: yes
@@ -40,7 +40,7 @@ intake:
     - id: C2
       county: "Sample"
       conviction_year: 2021
-      offense_level: felony
+      offense_type: felony
       code_section: ""
       sentence: prison
       probation_granted: no

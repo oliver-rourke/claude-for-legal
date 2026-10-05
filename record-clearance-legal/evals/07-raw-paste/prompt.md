@@ -24,6 +24,8 @@ Did you serve in a fire camp or on a hand crew? No
 Do you have a copy of your RAP sheet? No
 Tell us about your conviction: Misdemeanor petty theft, PC 484, 2018 in Sample County. I got probation and finished it in 2020 with no problems.
 I understand what Clean Slate means: Yes
+I understand the scope of representation: Yes
 I understand the limits of expungement: Yes
-I agree to the record sharing and data use terms: Yes
+I agree to record sharing: Yes
+I agree to the data use terms: Yes
 ```

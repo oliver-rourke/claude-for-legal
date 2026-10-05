@@ -89,7 +89,7 @@ If 2, stop. If 1, record name, bar jurisdiction and bar number under `## Who's u
 
 1. **Account tier and data handling.** Which Claude plan the program is on and what its retention and training terms say about client data.
 2. **AI-use practice.** Whether and how the program discloses AI-assisted screening to applicants, per ABA Formal Opinion 512 (2024), the state bar's guidance, and Rules of Professional Conduct 1.1, 1.4, 1.6 and 5.3.
-3. **RAP sheets and intake data.** RAP sheets, court records and identifiers never enter a session; the import step drops them. Where normalized records may be saved, who sees them, and how long they are kept.
+3. **RAP sheets and intake data.** Full RAP sheets and court records never enter a session; a short excerpt of conviction lines with identifiers removed may be pasted as case facts, and the import step drops any identifier it finds. Where normalized records may be saved, who sees them, and how long they are kept.
 4. **Heightened sensitivity.** Criminal records, immigration exposure, registration status, and trafficking or domestic violence flags carry heightened confidentiality expectations. Confirm whether any of these require extra safeguards or exclusion from the plugin.
 
 If any item is unresolved, flag it in the profile and note that staff should not use the plugin on real applicants until it is resolved.
@@ -117,11 +117,12 @@ Offer the three models from the profile (formal review queue, configurable flags
 
 - Primary source: Typeform, Airtable, CSV export, or paper and paste. Form or base IDs if any.
 - Identifier policy: initials or clinic ID.
+- Prior review decision: does the program keep a staff field recording an earlier eligibility decision? Its name, or none.
 - Confirm the default field map in `skills/intake-import/references/intake-schema.md`; capture overrides for fields that differ. Ask for an export header row to check the names.
 
 ### Part 5: Program gates (full)
 
-For each of residency, conviction in service area, prior representation, and any other gate: required or not, and the rule in one line. Then "when a gate fails": referral list, stop, or screen anyway for the attorney's information.
+For each of residency, conviction in service area, prior representation, and any other gate: required or not, and the rule in one line. Whether the five consents must be complete before screening (default yes). Then "when a gate fails": referral list, stop, or screen anyway for the attorney's information.
 
 ### Part 6: Relief types and referral targets (full)
 

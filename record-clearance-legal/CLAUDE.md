@@ -75,6 +75,7 @@ Setup must be run by the supervising attorney. Staff and volunteers run the impo
 | Prior representation | [PLACEHOLDER — yes / no / not applicable] | [PLACEHOLDER — e.g., "was a client of the public defender in any Sample County case"] |
 | Other | [PLACEHOLDER] | [PLACEHOLDER] |
 
+**Consents required before screening:** [PLACEHOLDER — yes (default) | no]
 **When a gate fails:** [PLACEHOLDER — e.g., "send the county referral list; do not screen further"]
 
 *Worked example.* A county public defender program may require all three: county resident, county conviction, prior public defender client. A legal aid office may require none.
@@ -140,6 +141,7 @@ Turn a row to "yes" only after adding a card for it under `skills/eligibility-sc
 **Primary source:** [PLACEHOLDER — Typeform | Airtable | CSV export | paper or paste]
 **Typeform form ID:** [PLACEHOLDER or n/a]
 **Airtable base, table, view:** [PLACEHOLDER or n/a]
+**Prior review decision field:** [PLACEHOLDER — form or staff field name | none]
 **Field map:** defaults in `skills/intake-import/references/intake-schema.md`; overrides below.
 
 | Form field | Record field | Note |

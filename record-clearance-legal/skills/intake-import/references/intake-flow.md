@@ -52,12 +52,12 @@ flowchart TD
 
 ## Endings
 
-The reference form uses three kinds of endings: not in this program (with a referral), deferred with the reason and when to reapply, and proceed. The deferral endings are the form's own pre-screen; the plugin repeats the same checks at import so that a record arriving from a different form, a CSV or a paper intake gets the same treatment.
+The reference form uses three kinds of endings: not in this program (with a referral), deferred with the reason and when to reapply, and proceed. The deferral endings are the form's own pre-screen; `triage-rules.md` repeats the same checks at import so that a record arriving from a different form, a CSV or a paper intake gets the same treatment.
 
 ## Optional per-case questions
 
-To get per-case bands from the form alone, add one repeating block per conviction with six questions: which court (county), what year, the level (infraction, misdemeanor, felony), the sentence type (probation only, jail, split sentence with supervision, prison, fine only), whether probation was granted and how it ended (completed, ended early, revoked, still on it), and the month the sentence ended. Map the block to a `cases[]` entry. Without it, `cases` stays empty and the screen runs at client level.
+To get per-case bands from the form alone, add one repeating block per conviction with six questions: which court (county), what year, the offense type (infraction, misdemeanor, felony), the sentence type (probation only, jail, split sentence with supervision, prison, fine only), whether probation was granted and how it ended (completed, ended early, revoked, still on it), the sentence term, and the sentencing month. Map the block to a `cases[]` entry. Without it, `cases` stays empty and the screen runs at client level.
 
 ## What the form does not collect
 
-Per-case facts (county, year, offense level, sentence type, probation outcome, completion month). The reference program reads those from the RAP sheet later. `/record-clearance-legal:intake-import` asks for them when staff have them and leaves `cases` empty when they do not; `/record-clearance-legal:eligibility-screen` runs a client-level screen either way.
+Per-case facts (county, year, offense type, sentence type and term, probation outcome, sentencing month). The reference program reads those from the RAP sheet later. `/record-clearance-legal:intake-import` asks for them when staff have them and leaves `cases` empty when they do not; `/record-clearance-legal:eligibility-screen` runs a client-level screen either way.

@@ -1,6 +1,6 @@
 # Eval suite
 
-One case per sample intake, plus a prose case, the Mono County filing-guidance case and the jurisdiction hard stop. Each case directory holds `prompt.md` (what the user says), `case.yaml` (one run, the test profile under `evals/fixtures/`, today pinned to 2026-10-04) and `graders/` (exact band strings and rules as regex graders, judgment calls as short LLM rubrics). `references/sample-intakes/EXPECTED.md` is the human-readable version of the same expectations.
+One case per sample intake, plus a prose case, the Mono County filing-guidance case, the jurisdiction hard stop, a RAP sheet excerpt, and three triage cases that run through intake-import. Each case directory holds `prompt.md` (what the user says), `case.yaml` (one run, the test profile under `evals/fixtures/`, today pinned to 2026-10-04) and `graders/` (exact band strings and rules as regex graders, judgment calls as short LLM rubrics). `references/sample-intakes/EXPECTED.md` is the human-readable version of the same expectations.
 
 Run from the plugin directory:
 

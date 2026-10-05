@@ -1,0 +1,10 @@
+schema_version: "1.1"
+name: 12-triage-consents
+runs: 1
+execution:
+  max_turns: 12
+  allowed_tools: [Read, Glob, Grep, Skill]
+  append_system_prompt: >-
+    Evaluation run for the record-clearance-legal plugin. The practice profile for this session is the test profile at evals/fixtures/profile/claude-for-legal/record-clearance-legal/CLAUDE.md (paths relative to the plugin root), with company-profile.md beside it; read it instead of the home path and note 'test profile' in the reviewer note. Today is 2026-10-05.
+context:
+  add_dirs: [evals/fixtures/profile]

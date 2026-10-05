@@ -30,7 +30,7 @@ intake:
     - id: C1
       county: "Sample"
       conviction_year: 2018
-      offense_level: misdemeanor
+      offense_type: misdemeanor
       code_section: "VC 23152(a)"
       sentence: probation_only
       probation_granted: yes

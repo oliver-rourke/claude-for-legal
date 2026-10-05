@@ -30,7 +30,7 @@ intake:
     - id: C1
       county: "Sample"
       conviction_year: 2023
-      offense_level: misdemeanor
+      offense_type: misdemeanor
       code_section: "PC 415"
       sentence: fine_only
       probation_granted: no

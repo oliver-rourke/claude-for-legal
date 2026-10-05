@@ -31,13 +31,14 @@ Already answered: C1 none, C2 no, C3 no, C4 no, Q1 felony, Q2 yes, Q3 revoked, Q
 
 | # | Ask when | Question | Options | Record field |
 |---|---|---|---|---|
-| Q1 | always | What level was the conviction? | infraction / misdemeanor / felony / felony later reduced to a misdemeanor / not sure | `offense_level` |
+| Q1 | always | What offense type was the conviction? | infraction / misdemeanor / felony / felony later reduced to a misdemeanor / not sure | `offense_type` |
 | Q2 | always | Was probation granted? | yes / no / not sure | `probation_granted` |
 | Q3 | Q2 yes | How did probation end? | completed with no violations / ended early by the court / completed, but with a violation or a revocation that was reinstated / revoked and sentenced to custody / still on probation / not sure | `probation_outcome` (`completed`, `terminated_early`, `completed_with_violation`, `revoked`, `ongoing`, `unknown`) |
 | Q4 | Q3 revoked, or Q2 no on a felony | What custody was imposed? | county jail / county jail split with mandatory supervision / state prison / fine only, no custody / not sure | `sentence` (or `revocation_custody` when Q3 was revoked) |
+| Q4b | Q2 yes, or any custody route | How long was the probation term or the sentence? | years or months / not sure | `sentence_term` |
 | Q5 | Q2 no on a misdemeanor or infraction | When was judgment pronounced? | month and year / not sure | `judgment_date` |
 | Q6 | Q2 no on a misdemeanor or infraction | Any new conviction since that judgment? | no / yes / not sure | `new_conviction_since` |
-| Q7 | any custody route | When did the sentence end, counting parole or supervision? | month and year / two dates if unsure which counts / not sure | `sentence_completed`, with the second date in `notes` |
+| Q7 | any custody route | When was the person sentenced (month and year; the conviction date if that is all you know)? If you know when the sentence actually ended, counting parole or supervision, give that instead. | month and year / two dates if unsure which counts / not sure | `sentencing_date`; `sentence_completed` when the actual end is known, with a second candidate date in `notes`; otherwise the screen estimates completion as sentencing date plus term |
 | Q8 | state prison | Was the person sentenced before October 1, 2011? | no / yes / not sure | derived from `conviction_year`; ask only when the year is 2011 or unknown |
 | Q9 | always, last | Code section, if known | text / not known | `code_section` |
 

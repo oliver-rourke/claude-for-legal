@@ -14,7 +14,7 @@ Sources: PC 1203.4 and PC 1203.41 text fetched from leginfo.legislature.ca.gov o
 
 ## 1. Client-level gates
 
-Run these first, from `intake.status`. They decide the packet before any case is looked at.
+Run these first, from `intake.status`. They decide the packet before any case is looked at. The order of evaluation, the program gates, the prior review decision and the consents live in `skills/intake-import/references/triage-rules.md` (check 1), which applies this table; this section states the legal effect of each answer.
 
 | Field | Value | Effect | Rule |
 |---|---|---|---|
@@ -35,11 +35,11 @@ Run these first, from `intake.status`. They decide the packet before any case is
 For each entry in `intake.cases`:
 
 - `probation_granted: yes` with `probation_outcome` in `completed`, `terminated_early`, `completed_with_violation`, `ongoing` routes to the PC 1203.4 rules in section 3.
-- `probation_granted: yes` with `probation_outcome: revoked` and `offense_level: felony` routes to the PC 1203.41 rules in section 4, reading `revocation_custody` as the sentence type. With `offense_level` misdemeanor or infraction it is `NEEDS ATTORNEY REVIEW`: the PC 1203.4 discretionary route and PC 1203.4a are both possible, and 1203.4a(a) speaks of a defendant "not granted probation" `[review]`.
-- `probation_granted: no` with `offense_level` in `misdemeanor`, `infraction`, `felony_reduced_to_misdemeanor` routes to the PC 1203.4a rules in section 3a.
-- `probation_granted: no` with `offense_level: felony` and `sentence` in `jail`, `split_mandatory_supervision`, `prison` routes to section 4; with `sentence: fine_only` it is `NEEDS ATTORNEY REVIEW` (unusual pattern).
+- `probation_granted: yes` with `probation_outcome: revoked` and `offense_type: felony` routes to the PC 1203.41 rules in section 4, reading `revocation_custody` as the sentence type. With `offense_type` misdemeanor or infraction it is `NEEDS ATTORNEY REVIEW`: the PC 1203.4 discretionary route and PC 1203.4a are both possible, and 1203.4a(a) speaks of a defendant "not granted probation" `[review]`.
+- `probation_granted: no` with `offense_type` in `misdemeanor`, `infraction`, `felony_reduced_to_misdemeanor` routes to the PC 1203.4a rules in section 3a.
+- `probation_granted: no` with `offense_type: felony` and `sentence` in `jail`, `split_mandatory_supervision`, `prison` routes to section 4; with `sentence: fine_only` it is `NEEDS ATTORNEY REVIEW` (unusual pattern).
 - Name every routed item's **route** from section 2a (for example "PC 1203.4 mandatory route: probation fulfilled") and say whether a declaration is usually needed.
-- `offense_level: unknown`, `sentence: unknown`, or `probation_granted: unknown` is `NEEDS ATTORNEY REVIEW` with a fact request naming the missing field.
+- `offense_type: unknown`, `sentence: unknown`, or `probation_granted: unknown` is `NEEDS ATTORNEY REVIEW` with a fact request naming the missing field.
 - A conviction from another state or a federal court is `NOT SCREENED` with the jurisdiction named; California rules are never applied to it.
 - Arrests route to `NOT SCREENED` with the PC 851.91 and 851.93 lines. The screen never states a limitations period; it writes "the attorney confirms whether the limitations period has run."
 
@@ -53,17 +53,17 @@ The route names below are the only route names a report uses. Gates clear means 
 | `probation_granted: yes`; `probation_outcome: terminated_early`; gates clear | PC 1203.4 mandatory route: early discharge | LIKELY ELIGIBLE | no | 1203.4(a)(1), "discharged prior to the termination of the period of probation" |
 | `probation_granted: yes`; `probation_outcome: completed_with_violation` | PC 1203.4 discretionary route: interest of justice | NEEDS ATTORNEY REVIEW | yes | 1203.4(a)(1), "in its discretion and the interest of justice" |
 | `probation_granted: yes`; `probation_outcome: ongoing` | none yet; early termination under PC 1203.3 is the referral | NOT ELIGIBLE NOW, recheck when probation ends | n/a | 1203.4(a)(1), "on probation for an offense" |
-| `probation_outcome: revoked`; `offense_level: felony`; `revocation_custody: split_mandatory_supervision` | PC 1203.41 route: split sentence, one year after completion | LIKELY ELIGIBLE if the year has run, else NOT ELIGIBLE NOW with the recheck date | yes | 1203.41(a)(2), one year after a 1170(h)(5)(B) sentence `[practitioner reading, verify]` |
-| `probation_outcome: revoked`; `offense_level: felony`; `revocation_custody: jail` | PC 1203.41 route: straight county jail, two years after completion | same pattern | yes | 1203.41(a)(2) |
-| `probation_outcome: revoked`; `offense_level: felony`; `revocation_custody: prison` | PC 1203.41 route: state prison, two years after completion; add the PC 1203.42 line when sentenced before October 1, 2011 | same pattern, plus the (a)(6) registration check | yes | 1203.41(a)(2), (a)(6) |
-| `probation_outcome: revoked`; `offense_level` misdemeanor or infraction | PC 1203.4 discretionary route and PC 1203.4a both possible | NEEDS ATTORNEY REVIEW | yes | 1203.4a(a) requires "not granted probation"; treatment of revoked probation is an attorney call `[model knowledge — verify]` |
-| `probation_granted: no`; `offense_level` misdemeanor, infraction or felony_reduced_to_misdemeanor; `judgment_date` at least 12 months ago; `new_conviction_since: no`; gates clear; sentence complied with | PC 1203.4a mandatory route | LIKELY ELIGIBLE | no | 1203.4a(a): "lapse of one year from the date of pronouncement of judgment," "fully complied with and performed the sentence," "lived an honest and upright life" |
+| `probation_outcome: revoked`; `offense_type: felony`; `revocation_custody: split_mandatory_supervision` | PC 1203.41 route: split sentence, one year after completion | LIKELY ELIGIBLE if the year has run, else NOT ELIGIBLE NOW with the recheck date | yes | 1203.41(a)(2), one year after a 1170(h)(5)(B) sentence `[practitioner reading, verify]` |
+| `probation_outcome: revoked`; `offense_type: felony`; `revocation_custody: jail` | PC 1203.41 route: straight county jail, two years after completion | same pattern | yes | 1203.41(a)(2) |
+| `probation_outcome: revoked`; `offense_type: felony`; `revocation_custody: prison` | PC 1203.41 route: state prison, two years after completion; add the PC 1203.42 line when sentenced before October 1, 2011 | same pattern, plus the (a)(6) registration check | yes | 1203.41(a)(2), (a)(6) |
+| `probation_outcome: revoked`; `offense_type` misdemeanor or infraction | PC 1203.4 discretionary route and PC 1203.4a both possible | NEEDS ATTORNEY REVIEW | yes | 1203.4a(a) requires "not granted probation"; treatment of revoked probation is an attorney call `[model knowledge — verify]` |
+| `probation_granted: no`; `offense_type` misdemeanor, infraction or felony_reduced_to_misdemeanor; `judgment_date` at least 12 months ago; `new_conviction_since: no`; gates clear; sentence complied with | PC 1203.4a mandatory route | LIKELY ELIGIBLE | no | 1203.4a(a): "lapse of one year from the date of pronouncement of judgment," "fully complied with and performed the sentence," "lived an honest and upright life" |
 | as above, `judgment_date` less than 12 months ago | PC 1203.4a, waiting period | NOT ELIGIBLE NOW, recheck at judgment plus 12 months | n/a | 1203.4a(a) |
 | as above, `new_conviction_since: yes` | PC 1203.4a discretionary route | NEEDS ATTORNEY REVIEW | yes | 1203.4a(b), "in its discretion and in the interest of justice" |
-| `probation_granted: no`; `offense_level: felony`; `sentence: split_mandatory_supervision` | PC 1203.41 route: split sentence, one year after completion | LIKELY ELIGIBLE if run, else NOT ELIGIBLE NOW | yes | 1203.41(a)(2) |
-| `probation_granted: no`; `offense_level: felony`; `sentence: jail` | PC 1203.41 route: straight county jail, two years after completion | same | yes | 1203.41(a)(2) |
-| `probation_granted: no`; `offense_level: felony`; `sentence: prison` | PC 1203.41 route: state prison, two years after completion; add PC 1203.42 when sentenced before October 1, 2011 | same, plus (a)(6) | yes | 1203.41(a)(2), (a)(6) |
-| `probation_granted: no`; `offense_level: felony`; `sentence: fine_only` | unusual pattern | NEEDS ATTORNEY REVIEW | n/a | none of the three sections fits cleanly |
+| `probation_granted: no`; `offense_type: felony`; `sentence: split_mandatory_supervision` | PC 1203.41 route: split sentence, one year after completion | LIKELY ELIGIBLE if run, else NOT ELIGIBLE NOW | yes | 1203.41(a)(2) |
+| `probation_granted: no`; `offense_type: felony`; `sentence: jail` | PC 1203.41 route: straight county jail, two years after completion | same | yes | 1203.41(a)(2) |
+| `probation_granted: no`; `offense_type: felony`; `sentence: prison` | PC 1203.41 route: state prison, two years after completion; add PC 1203.42 when sentenced before October 1, 2011 | same, plus (a)(6) | yes | 1203.41(a)(2), (a)(6) |
+| `probation_granted: no`; `offense_type: felony`; `sentence: fine_only` | unusual pattern | NEEDS ATTORNEY REVIEW | n/a | none of the three sections fits cleanly |
 | `status.fire_camp: yes` | PC 1203.4b line added whatever the band | referral | n/a | 1203.4b(b)(4): no need to complete supervision |
 
 **Declaration usually needed** mirrors the discretionary routes: when the court "may" rather than "shall," a declaration describing the person's circumstances is the norm `[practice note]`. The exclusion checks that can downgrade a LIKELY ELIGIBLE row are in sections 3, 3a and 4; when `code_section` is blank, say which checks could not run.
@@ -99,7 +99,7 @@ Statutory basis (PC 1203.4a(a)): a person "convicted of a misdemeanor and not gr
 | `judgment_date` less than 12 months ago | `NOT ELIGIBLE NOW`; recheck date = judgment month plus 12 months, arithmetic shown, `[model calculation — verify]` |
 | `new_conviction_since: yes` | `NEEDS ATTORNEY REVIEW`; route: PC 1203.4a discretionary route (subd. (b)); declaration usually needed: yes |
 | `judgment_date: unknown` or `new_conviction_since: unknown` | `NEEDS ATTORNEY REVIEW` with a fact request |
-| `offense_level: felony_reduced_to_misdemeanor` | treat as a misdemeanor for this route and add `[review]` "confirm the reduction" `[model knowledge — verify]` |
+| `offense_type: felony_reduced_to_misdemeanor` | treat as a misdemeanor for this route and add `[review]` "confirm the reduction" `[model knowledge — verify]` |
 
 **Exclusion check.** Subdivision (d) excludes "a misdemeanor violation of subdivision (c) of Section 288," "a misdemeanor falling within the provisions of Section 42002.1 of the Vehicle Code," and "an infraction falling within the provisions of Section 42001 of the Vehicle Code." If `code_section` matches one, downgrade to `NEEDS ATTORNEY REVIEW` with "may be excluded by PC 1203.4a(d)." When blank, say the check could not run.
 
@@ -121,6 +121,8 @@ Statutory basis (PC 1203.41(a)): "If a defendant is convicted of a felony, the c
 | `sentence: jail` | two years after completion of the sentence (PC 1170(h)(5)(A)) |
 | `sentence: prison` | two years after completion of the sentence |
 | `probation_outcome: revoked` | read `revocation_custody` as the sentence type and apply the matching row |
+
+**Completion date.** Use `sentence_completed` when the record has it. When it is unknown but `sentencing_date` and `sentence_term` are known, estimate completion as sentencing month plus term, show the arithmetic and tag it `[estimated from the term — verify against the record]`. A jail estimate ignores custody credits, so the real end is usually earlier; a prison estimate ignores parole, which follows release and is commonly counted as part of the sentence (see PC 3000(a)(1) on the card `[model knowledge — verify]`), so the estimate is a floor and the item carries `[review]` whenever its band depends on it. When an estimate and a stated date disagree, treat them as two candidate dates under the divergence rule below.
 
 The PC 1203.4(b) and (c) exclusion checks belong to PC 1203.4 items only. A 1203.41 item has one exclusion, registration on a state prison felony (subd. (a)(6)); when `code_section` is blank on a 1203.41 item, do not list a (b) or (c) check as missing.
 
@@ -159,7 +161,7 @@ Text for the full report (the compact report uses one clause: check the RAP shee
 1. If `pending_case` or `current_supervision` is `unsure`, or any row in section 1 produced a `NEEDS ATTORNEY REVIEW` effect: packet `NEEDS ATTORNEY REVIEW`. Every item band is shown but marked provisional. An unknown trafficking or DV answer never triggers this rule.
 2. Else if a client-level disqualifier applies (`pending_case: yes`, `current_supervision: probation`): packet `NOT ELIGIBLE NOW` with the recheck trigger.
 3. Else: packet summary in exactly this form, "LIKELY ELIGIBLE n of m, NOT ELIGIBLE NOW k, NEEDS ATTORNEY REVIEW j", with n, k and j counted over the case entries. A per-item `NOT ELIGIBLE NOW` never becomes the packet band; only a client-level disqualifier does. Example: clean gates, one case `LIKELY ELIGIBLE` and one case `NOT ELIGIBLE NOW` give the packet "LIKELY ELIGIBLE 1 of 2, NOT ELIGIBLE NOW 1, NEEDS ATTORNEY REVIEW 0".
-4. If `cases` is empty: packet "client-level pre-screen only: [no disqualifier found | disqualifier: X]" plus a fact request for the six case fields (county, conviction year, offense level, sentence type, probation granted and outcome, completion month), in the report template's no-case form. No per-case band is given.
+4. If `cases` is empty: packet "client-level pre-screen only: [no disqualifier found | disqualifier: X]" plus a fact request for the six case fields (county, conviction year, offense type, sentence type and term, probation granted and how it ended, sentencing month), in the report template's no-case form. No per-case band is given.
 
 Under-flagging is the one-way door. When two rules point to different bands and the record does not settle it, use `NEEDS ATTORNEY REVIEW` and say why.
 

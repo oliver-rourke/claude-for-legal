@@ -1,6 +1,6 @@
 # Normalized intake record (schema v0.2)
 
-The normalized intake record is the single shape that `/record-clearance-legal:intake-import` writes and `/record-clearance-legal:eligibility-screen` reads. It is plugin-internal. It is not an upload format for any engine, and it never carries a name, contact detail, date of birth, Social Security number, CII number or RAP sheet. The screen drops any of those it finds, says which categories it dropped, and never echoes them. Fields marked optional below are carried for the clinic's records; no screening rule reads them.
+The normalized intake record is the single shape that `/record-clearance-legal:intake-import` writes and `/record-clearance-legal:eligibility-screen` reads. It is plugin-internal. It is not an upload format for any engine, and it never carries a name, contact detail, date of birth, Social Security number, CII number or RAP sheet. The screen drops any of those it finds, says which categories it dropped, and never echoes them. Fields marked optional below are carried for the clinic's records; triage reads the ones its rules name.
 
 ## The record
 
@@ -13,6 +13,7 @@ intake:
     resident_of_service_area: yes | no | unknown
     conviction_in_service_area: yes | no | unknown
     prior_representation: yes | no | unknown | not_required
+    prior_review_decision: none | cleared | not_eligible   # staff field; triage rule 2
   person:
     reference: "initials or clinic ID only"
     preferred_language: en | es | other   # optional; carried, not screened
@@ -20,17 +21,17 @@ intake:
     pending_case: no | yes | unsure
     current_supervision: none | probation | parole | mandatory_supervision | prcs | unsure
     supervision_ended_within_3_years: none | parole | mandatory_supervision | prcs | unsure
-    supervision_ended_bucket: under_1_year | 1_year_or_more | under_2_years | 2_years_or_more | unknown   # optional; carried, not screened
+    supervision_ended_bucket: under_1_year | 1_year_or_more | under_2_years | 2_years_or_more | unknown   # triage rule 5
     months_since_supervision_ended: integer | unknown   # optional; carried, not screened
-    other_convictions: yes | no | unknown        # optional; besides the case that carried the supervision
+    other_convictions: yes | no | unknown        # triage rules 4 and 5; besides the case that carried the supervision
     fire_camp: no | yes | unsure
     fire_camp_year: YYYY | unknown   # optional; carried, not screened
     registration_290: no | current | terminated | unsure
     trafficking_or_dv_remedies: no | yes | unknown   # unknown when the form did not ask; never asked by the screen
-    has_rap_sheet: no | yes   # optional; carried, not screened
+    has_rap_sheet: no | yes   # triage next step
   cases: []                            # optional; one entry per conviction, shape below
   arrests_without_conviction: []       # optional; one entry per arrest, shape below
-  consents:                            # optional; carried for clinic records, not screened
+  consents:                            # triage rule 8: all five required unless the profile says otherwise
     clean_slate_definition: yes | no
     representation_scope: yes | no
     expungement_limits: yes | no
@@ -44,15 +45,17 @@ intake:
 - id: C1
   county: "county of conviction"
   conviction_year: YYYY
-  offense_level: infraction | misdemeanor | felony | felony_reduced_to_misdemeanor | unknown
+  offense_type: infraction | misdemeanor | felony | felony_reduced_to_misdemeanor | unknown   # offense_level is accepted as an alias from older records
   code_section: "optional, e.g. PC 484(a); leave blank when not known"
   sentence: probation_only | jail | split_mandatory_supervision | prison | fine_only | unknown
+  sentence_term: "free text, e.g. 2 years probation, 16 months jail, 3 years prison; unknown"
+  sentencing_date: YYYY-MM | unknown        # the conviction date when nothing better is known
   probation_granted: yes | no | unknown
   probation_outcome: completed | terminated_early | completed_with_violation | revoked | ongoing | not_applicable | unknown
   revocation_custody: none | jail | split_mandatory_supervision | prison | unknown   # when probation_outcome is revoked
   judgment_date: YYYY-MM | unknown        # 1203.4a counts one year from pronouncement of judgment
   new_conviction_since: no | yes | unknown # any conviction after that judgment
-  sentence_completed: YYYY-MM | unknown
+  sentence_completed: YYYY-MM | unknown    # actual end, counting parole or supervision; when unknown the screen estimates sentencing_date plus sentence_term and tags the estimate
   notes: "free text; no names, no case numbers"
 ```
 
@@ -67,7 +70,7 @@ intake:
 
 ### Minimal record
 
-The screen reads only these fields: `record_id`, `source`, `received`, `person.reference`; `status.pending_case`, `status.current_supervision`, `status.supervision_ended_within_3_years`, `status.registration_290`, `status.fire_camp`, `status.trafficking_or_dv_remedies`; `program_gates`; every case field except `notes` is used by some rule, and `notes` carries the second completion date; arrests use all four fields. A paste may give the keys in any order; a missing status gate reads as `unsure`, a missing case field as `unknown`. The import step still emits the full record in schema order.
+Check 1 reads `program_gates` (including `prior_review_decision`), `status.pending_case`, `status.current_supervision`, `status.supervision_ended_within_3_years`, `status.supervision_ended_bucket`, `status.other_convictions`, `status.fire_camp`, `status.registration_290`, `status.trafficking_or_dv_remedies`, `status.has_rap_sheet` and the five `consents`. Check 2 reads `record_id`, `source`, `received`, `person.reference`, the status gates, and every case field (`notes` carries a second completion date); arrests use all four fields. A paste may give the keys in any order; a missing status gate reads as `unsure`, a missing case field as `unknown`. The import step still emits the full record in schema order.
 
 ## Field notes
 
@@ -75,6 +78,7 @@ The screen reads only these fields: `record_id`, `source`, `received`, `person.r
 - **`current_supervision` and `supervision_ended_within_3_years`.** Intake forms often say "community supervision" for anything that is not probation or parole. Under PC 1203.41(a)(2) the waiting period is one year after a split sentence served with mandatory supervision (PC 1170(h)(5)(B)) and two years after a straight county jail term (the common reading of the PC 1170(h)(5)(A) cross-reference `[model knowledge — verify]`) or a state prison term. Post-release community supervision (PRCS) follows a prison term. Record what the applicant said as `mandatory_supervision` and let staff confirm whether it was mandatory supervision or PRCS; the screen flags the difference.
 - **`supervision_ended_bucket` versus `months_since_supervision_ended`.** Forms ask in buckets ("less than 2 years ago"). Keep the bucket, and record a month count only when staff know it. The screen computes recheck dates only from a known month or a known `sentence_completed`; a bucket alone produces a fact request.
 - **`sentence`.** `probation_only` is a grant of probation with any custody served as a condition of probation. `split_mandatory_supervision` is a PC 1170(h)(5)(B) sentence. `jail` is a PC 1170(h)(5)(A) county jail felony term or a misdemeanor jail term. `prison` is state prison. When the applicant does not know, write `unknown`; the screen asks.
+- **`sentence_term` and `sentencing_date`.** What the court imposed, as written ("2 years probation", "16 months jail", "3 years prison"), and when. When the actual end is unknown, the screen estimates completion as sentencing month plus term and tags it; a RAP sheet line such as "002 YEARS PROBATION" maps straight here.
 - **`sentence_completed`.** The month the sentence, including any parole or supervision, ended. When release from custody and discharge from supervision differ, put the later month here and note the earlier one in `notes`; the screen flags the choice for attorney review.
 - **`probation_outcome`.** `completed` means no violations; `terminated_early` means the court ended probation early; `completed_with_violation` covers a violation or a revocation that was reinstated and then finished; `revoked` means probation ended in custody, with the custody type in `revocation_custody`. The distinction decides whether PC 1203.4's mandatory or discretionary route applies.
 - **`judgment_date` and `new_conviction_since`.** Used only on the PC 1203.4a route; leave `unknown` elsewhere.
@@ -91,6 +95,7 @@ The reference form is The Access Project's Mono County intake (45 rows). Program
 | 2 | Resident of the program's county | `program_gates.resident_of_service_area` | Yes or No; clinic-configurable gate |
 | 3 | Conviction in the program's county | `program_gates.conviction_in_service_area` | Yes or No; clinic-configurable gate |
 | 4 | Represented by the public defender | `program_gates.prior_representation` | Yes or No; `not_required` when the clinic has no such gate |
+| staff | Prior review decision (a staff field, not on the form) | `program_gates.prior_review_decision` | cleared, not eligible, or none |
 | 5 | Public defender name | dropped | Third-party identifier; stays in the clinic's own system |
 | 6 to 8 | First, middle, last name | `person.reference` | Initials only, or the clinic ID |
 | 9 to 10 | Email, mobile phone | dropped | Contact details are never imported |
@@ -121,7 +126,7 @@ The reference form is The Access Project's Mono County intake (45 rows). Program
 
 ## What is never imported
 
-Names, email addresses, phone numbers, mailing addresses, dates of birth, Social Security numbers, CII numbers, registry dates, uploaded documents and attachment links. The import step says which of these it dropped and does not echo their values.
+Names, email addresses, phone numbers, mailing addresses, dates of birth, Social Security numbers, CII, SID, FBI and driver's license numbers, case, docket and booking numbers, registry dates, uploaded documents and attachment links. The import step says which of these it dropped and does not echo their values. A RAP sheet or docket excerpt pasted as text is accepted as case facts once those identifiers are removed; the document itself is never uploaded.
 
 ## Program gates are configuration
 
@@ -130,5 +135,7 @@ The three gate rows above are one program's rules. The practice profile section 
 ## Versioning
 
 2026-10-04, plugin v0.3: fields no screening rule reads are marked optional; pastes accept keys in any order; no field renamed.
+
+2026-10-05, plugin v0.4: `offense_level` renamed `offense_type` (alias accepted); `sentence_term`, `sentencing_date` and `program_gates.prior_review_decision` added; consents and the supervision buckets are now read by triage.
 
 Schema v0.2, 2026-10-04: added `felony_reduced_to_misdemeanor`, `completed_with_violation`, `revocation_custody`, `judgment_date`, `new_conviction_since` for the baseline interview and the PC 1203.4a route. v0.1 records remain valid; missing fields read as `unknown`. Add fields at the end of a block; never rename an existing field without bumping the version and updating both skills.

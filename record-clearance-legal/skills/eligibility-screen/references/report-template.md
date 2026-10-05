@@ -6,7 +6,7 @@ Two forms. The compact form is the default. The full form is for `--full`, and f
 
 - **Reviewer note.** One line when the run is green (no `[review]` flags, no missing fields, currency current, no defaults applied): `> ⚠️ Reviewer note: cards last confirmed [date] · research connector [✓ verified | not connected, cites from the cards, verify before relying] · read [id]: [n] cases, [m] arrests, nothing missing · no flags · ready for your eyes`. Otherwise the bullet form, keeping only the bullets that say something: **Sources** always; **Read** always; **Flagged** when at least one `[review]`; **Currency** only when stale; **Defaults applied** when the profile had placeholders; **Before relying** when there is an action.
 - **One tag per cite.** A rule quoted from a card carries `[statute / regulator site]`; the cards' last-confirmed date appears once, in the Sources line. Anything not on a card carries `[model knowledge — verify]`. Computed dates carry `[model calculation — verify]`; judgment calls carry `[review]`.
-- **Plain words.** Say "overall", not "packet band" or "roll-up"; name the route with its statute; name supervision by its type and spell out PRCS once as post-release community supervision. No version numbers in a report.
+- **Plain words.** Say "check 1" and "check 2", not "packet band" or "roll-up"; name the route with its statute; name supervision by its type and spell out PRCS once as post-release community supervision. No version numbers in a report.
 - **Empty sections are omitted.** No "none" rows, no "no cases" tables.
 - **Next steps are actions, not analysis.** One bullet per item, one action each, never restating the item block. LIKELY ELIGIBLE: the card's next-step sentence, then the county filing bullet. NOT ELIGIBLE NOW: log the date and screen again then. NEEDS ATTORNEY REVIEW: the question for the attorney in one sentence (plus the filing bullet when the route is discretionary). NOT SCREENED: the referral in one clause.
 - **Filing bullet.** For each item on a petition route, one bullet "Filing in [county]:" from `county-filing-guide.md`: the petition and order forms, the proof-of-service form, who is served and how, the declaration form only when a declaration is usually needed, and one local point when the county has one. A county not in the table gets the guide's statewide default and says so. Always tagged `[county filing guide, imported 2026-10-04 — verify with the court]`.
@@ -28,8 +28,8 @@ Dropped at import: [categories, or none].
 2. No open or pending case.
 3. Not required to register under PC 290.
 4. No fire camp or hand crew time.
-5. C1: [section] [level], [county], [year].
-6. C1: [probation granted and completed with no violations, ended YYYY-MM | custody type and the month the sentence ended | judgment YYYY-MM, no new conviction since].
+5. C1: [section] [offense type], [county], [year].
+6. C1: [probation granted for [term], completed with no violations | custody type and term, sentenced YYYY-MM, ended YYYY-MM (actual, or estimated from the term) | judgment YYYY-MM, no new conviction since].
 7. Program gates: [lives in the service area; conviction in the service area | not asked].
 
 Reply yes to confirm all and I will screen, or give the number and the correction. Say record to see the full YAML.
@@ -46,9 +46,11 @@ Budget: a clean one-case screen fits in about 300 words with its filing bullet; 
 
 # Screen: [reference] ([record_id]), [date]
 
-**Overall:** [the band line from the rulebook section 6, verbatim]. Client-level gates [clear (no pending case, no supervision, no registration, no fire camp, no trafficking or DV flag) | the gate that fired and its effect]. Program gates [met | not met: gate, rule applied]. [QUEUED for [attorney] at [queue] | CHECK WITH [attorney] BEFORE ACTING | nothing, per the review model]
+**Check 1, intake triage:** [outcome from triage-rules.md]. [Reasons in one sentence: program gates, pending case, supervision, registration, consents, follow-ups.] [QUEUED for [attorney] at [queue] | CHECK WITH [attorney] BEFORE ACTING | nothing, per the review model]
 
-**[C1], [code section or "section not known"] [level], [county] [year]: [BAND].** [Route name]; [subdivision]; [the two or three facts that drove it]. Declaration usually needed: [yes | no]. [Exclusion checks run and clear | could not run, section blank]. [AUTOMATIC RELIEF MAY APPLY: check the RAP sheet for a "relief granted" note before filing ([PC 1203.425 pinpoint]) | automatic relief does not apply yet: [condition that fails] until [date]]. [Recheck: YYYY-MM + N months = YYYY-MM `[model calculation — verify]`] [`[review]` the question for the attorney] `[statute / regulator site]`
+**Check 2, eligibility screen:** [the band line from the rulebook section 6, verbatim][; every band provisional when check 1 is NEEDS ATTORNEY REVIEW].
+
+**[C1], [code section or "section not known"] [offense type], [county] [year]: [BAND].** [Route name]; [subdivision]; [the two or three facts that drove it]. Declaration usually needed: [yes | no]. [Exclusion checks run and clear | could not run, section blank]. [AUTOMATIC RELIEF MAY APPLY: check the RAP sheet for a "relief granted" note before filing ([PC 1203.425 pinpoint]) | automatic relief does not apply yet: [condition that fails] until [date]]. [Recheck: YYYY-MM + N months = YYYY-MM `[model calculation — verify]`] [`[review]` the question for the attorney] `[statute / regulator site]`
 
 [one block per further case; an arrest is one line: **A1, [year] arrest, [county]: NOT SCREENED.** PC 851.91 petition if the limitations period has run, which the attorney confirms; PC 851.93 relief may already appear on the record. Referral: [target from the profile].]
 
@@ -80,9 +82,11 @@ When the user picks the filing checklist, print the header, a one-line reviewer 
 
 # Screen: [reference] ([record_id]), [date]
 
-**Overall:** client-level pre-screen only: [no disqualifier found at client level | disqualifier: X]. [The five gate answers in one sentence.] No cases were given, so no case gets a band. Program gates [met | not met: gate, rule applied]. [review-model line]
+**Check 1, intake triage:** [outcome]. [Reasons in one sentence.] [review-model line]
 
-**To screen, I need for each conviction:** county; year of conviction; level (infraction, misdemeanor, felony); sentence type (probation only, jail, split sentence with mandatory supervision, prison, fine only); whether probation was granted and how it ended; the month the sentence ended. Type them, or say "walk me through it" and I will ask one or two at a time.
+**Check 2, eligibility screen:** client-level pre-screen only: [no disqualifier found at client level | disqualifier: X]. No cases were given, so no case gets a band.
+
+**To screen, I need for each conviction:** county; year of conviction; offense type (infraction, misdemeanor, felony); sentence type (probation only, jail, split sentence with mandatory supervision, prison, fine only) and its term; whether probation was granted and how it ended; the sentencing month, or the month it ended if you know it. Type them, or say "walk me through it" and I will ask one or two at a time.
 
 **What next?** 1 send me the facts · 2 queue the pre-screen for [attorney] · or tell me what you'd do.
 ```
@@ -103,7 +107,8 @@ When the user picks the filing checklist, print the header, a one-line reviewer 
 
 ## Bottom line
 
-**Overall:** [NEEDS ATTORNEY REVIEW (a client-level gate is unsure or flagged) | NOT ELIGIBLE NOW (a client-level disqualifier applies) | LIKELY ELIGIBLE n of m, NOT ELIGIBLE NOW k, NEEDS ATTORNEY REVIEW j (clean gates; counts over the cases) | client-level pre-screen only: no disqualifier found at client level]
+**Check 1, intake triage:** [outcome and reasons]
+**Check 2, eligibility screen:** [NEEDS ATTORNEY REVIEW (a client-level gate is unsure or flagged) | NOT ELIGIBLE NOW (a client-level disqualifier applies) | LIKELY ELIGIBLE n of m, NOT ELIGIBLE NOW k, NEEDS ATTORNEY REVIEW j (clean gates; counts over the cases) | client-level pre-screen only: no disqualifier found at client level]
 [Two sentences: why, and the single next action.]
 [QUEUED for [supervising attorney] at [queue location] | CHECK WITH [attorney] BEFORE ACTING | nothing, per the review model]
 [Program gates: met | not met: [gate], [profile rule applied]]
@@ -162,7 +167,9 @@ When the user picks the filing checklist, print the header, a one-line reviewer 
 
 # Screen: D.R. (synthetic-01), 2026-10-04
 
-**Overall:** LIKELY ELIGIBLE 1 of 1, NOT ELIGIBLE NOW 0, NEEDS ATTORNEY REVIEW 0. Client-level gates clear (no pending case, no supervision, no registration, no fire camp, no trafficking or DV flag). Program gates met. QUEUED for [supervising attorney] at [queue].
+**Check 1, intake triage:** PROCEED TO SCREEN. Program gates met; no pending case; no supervision now or in the past three years; not registered; no fire camp; consents complete. QUEUED for [supervising attorney] at [queue].
+
+**Check 2, eligibility screen:** LIKELY ELIGIBLE 1 of 1, NOT ELIGIBLE NOW 0, NEEDS ATTORNEY REVIEW 0.
 
 **C1, PC 484(a) misdemeanor, Sample County 2017: LIKELY ELIGIBLE.** PC 1203.4 mandatory route: probation fulfilled; subdivision (a)(1), first clause; probation completed 2019-06 with no violations reported, and the person is not serving a sentence, on probation or charged. Declaration usually needed: no. PC 1203.4(b) and (c) checks run: PC 484(a) is not listed and is not a Vehicle Code offense. AUTOMATIC RELIEF MAY APPLY: probation completed without revocation, so check the RAP sheet for a "relief granted" note before filing (PC 1203.425(a)(1)(B)(iv)(I)(ia), (a)(2)(B)). `[statute / regulator site]`
 

@@ -30,7 +30,7 @@ intake:
     - id: C1
       county: "Sample"
       conviction_year: 2017
-      offense_level: misdemeanor
+      offense_type: misdemeanor
       code_section: "PC 484(a)"
       sentence: probation_only
       probation_granted: yes

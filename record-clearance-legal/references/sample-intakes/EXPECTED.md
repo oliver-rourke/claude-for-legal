@@ -6,6 +6,7 @@ These are the acceptance tests for `/record-clearance-legal:eligibility-screen`.
 
 - Before the screen, the verification checklist appears: numbered yes-or-no lines for the facts the screen will rely on, ending with the yes-or-correction prompt; the screen follows a yes. The checklist is skipped only when the user asked to ("just screen", `--no-confirm`), which the eval prompts do.
 - First line of the report is the AI-assisted draft label from the practice profile.
+- The body opens with two lines: `**Check 1, intake triage:**` with the outcome from `triage-rules.md` and its reasons, then `**Check 2, eligibility screen:**` with the band line. When check 1 is NOT ELIGIBLE NOW or NOT ELIGIBLE FOR THE PROGRAM, check 2 runs only on request.
 - The reviewer note is one line when the run is green; otherwise only the bullets that say something. It names the cards' last-confirmed date and whether a research connector was used.
 - No name, email, phone number, address or date of birth appears anywhere in the output. Initials or a clinic ID are fine.
 - No fact appears that is not in the fixture or the profile.
@@ -44,7 +45,7 @@ These are the acceptance tests for `/record-clearance-legal:eligibility-screen`.
 
 | Item | Expected band | Must mention | Must flag |
 |---|---|---|---|
-| Overall | client-level pre-screen only: no disqualifier found at client level | that no cases were given and no case gets a band; the six facts needed (county, conviction year, offense level, sentence type, probation granted and how it ended, completion month) as one list; the offer to walk through them | none |
+| Overall | client-level pre-screen only: no disqualifier found at client level | that no cases were given and no case gets a band; the six facts needed (county, conviction year, offense type, sentence type and term, probation granted and how it ended, sentencing month) as one list; the offer to walk through them | none |
 | Cases | none | | |
 | Length | under 220 words | | |
 
@@ -84,6 +85,47 @@ The user types the prose in `08-filing-guidance.md` with no record.
 | C1 | LIKELY ELIGIBLE | route "PC 1203.4 mandatory route: probation fulfilled"; declaration usually needed: no | |
 | Filing bullet | "Filing in Mono County" | CR-180 petition, CR-181 order, CR-106 proof of service by mail; serve the DA by mail; mail or in-person filing; the court sets a hearing (about a month out); the tag `[county filing guide, imported 2026-10-04 — verify with the court]` | MC-031 listed as required (the route is mandatory, so no declaration is usually needed); any Proposition 47, Proposition 64 or fire camp form; a DA address or email invented beyond the guide |
 | Questions | none; the verification checklist, then the screen after a yes | | |
+
+## Fixture 09 (RAP sheet excerpt)
+
+The text block is pasted into the screen.
+
+| Item | Expected | Must mention | Must not |
+|---|---|---|---|
+| Input | accepted as case facts; no refusal | the attorney still reads the full RAP sheet | a request for a document; "copied from a RAP sheet" as a reason to refuse |
+| Mapping | San Diego County (Central courthouse); misdemeanor; HS 11377(a); probation only, term 2 years; sentenced 2023-05; completed | the estimate 2023-05 + 24 months = 2025-05 `[estimated from the term — verify against the record]` | an invented end month stated as fact |
+| Check 1 | PROCEED TO SCREEN (gates clear from the prose; consents not asked, noted as a follow-up, not a stop, because the input is prose rather than a form) | | |
+| C1 | LIKELY ELIGIBLE | route "PC 1203.4 mandatory route: probation fulfilled"; HS 11377 is not a PC 1203.4(b) section and not a Vehicle Code offense; declaration usually needed: no; AUTOMATIC RELIEF MAY APPLY | |
+| Filing | "Filing in San Diego County": CR-180 petition with the San Diego CRM-205 work-up sheet, CR-181 order, CR-106 proof of service by mail; serve probation and the DA by mail; original + 3; remote appearance permitted; the North County form CRM-204 does not apply to Central | | any Proposition 47 form (not screened; HS 11377 may be noted as a Proposition 47 section `[model knowledge — verify]`) |
+
+## Fixture 10 (triage, consents incomplete)
+
+Run through `/record-clearance-legal:intake-import`.
+
+| Item | Expected |
+|---|---|
+| Dropped | name |
+| Check 1 | NOT ELIGIBLE FOR THE PROGRAM; reason "consents incomplete: record sharing, data use"; the profile's "When a gate fails" step or "send the consent form again"; check 2 offered on request only |
+| Must not | any band for a conviction; "eligible" or "ineligible" standing alone |
+
+## Fixture 11 (triage, not sure on the pending case)
+
+Run through `/record-clearance-legal:intake-import`.
+
+| Item | Expected |
+|---|---|
+| Check 1 | NEEDS ATTORNEY REVIEW; reason "pending case answered not sure, no prior clearance"; everything else clear; RAP sheet not on hand, request it; hand-off to the screen with every band provisional |
+| Variant | with `program_gates.prior_review_decision: cleared`, PROCEED TO SCREEN |
+| Language | `preferred_language: es` recorded; no effect on triage |
+
+## Fixture 12 (triage, parole ended under two years ago)
+
+Run through `/record-clearance-legal:intake-import`.
+
+| Item | Expected |
+|---|---|
+| Check 1 | NOT ELIGIBLE NOW; released from parole 2025-03, under two years, no other convictions; recheck 2025-03 + 24 months = 2027-03 `[model calculation — verify]` (PC 1203.41(a)(2)); check 2 on request only |
+| Must not | a band for a conviction; treating the bucket alone as a date (the month is given, so the date is computed) |
 
 ## Interactive scenario A
 

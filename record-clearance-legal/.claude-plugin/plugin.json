@@ -1,6 +1,6 @@
 {
   "name": "record-clearance-legal",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Screens a structured record clearance intake against California dismissal statutes (PC 1203.4, PC 1203.4a and PC 1203.41) into likely eligible, not eligible yet, needs attorney review, and automatic relief may apply, with attorney-review triggers on every call. Imports intakes from a pasted form, a CSV export, Typeform or Airtable, or asks an attorney a short set of questions when there is no record, and hands cases that need full RAP sheet analysis to a clinic's own engine or attorney.",
   "author": {
     "name": "The Access Project"
