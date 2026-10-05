@@ -21,7 +21,7 @@ Rules for every skill, command, and agent in this plugin:
 # Record Clearance Practice Profile
 
 *Written by the supervising attorney's cold-start interview. Staff and volunteers don't edit this;
-they run `/record-clearance-legal:intake-import` and `/record-clearance-legal:eligibility-screen`.
+they run `/record-clearance-legal:eligibility-screen` (and `/record-clearance-legal:intake-import` for exports and connectors).
 If you see bracketed PLACEHOLDER markers below, run `/record-clearance-legal:cold-start-interview`.*
 
 ---
@@ -47,7 +47,7 @@ Setup must be run by the supervising attorney. Staff and volunteers run the impo
 | Airtable (intake base) | [✓ / ⚪ / ✗] | Paste the record or export a CSV |
 | Google Drive (exports, consent texts, referral lists) | [✓ / ⚪ / ✗] | Local files |
 | Slack (attorney review channel) | [✓ / ⚪ / ✗] | Copy the screening summary by hand |
-| CourtListener (citation verification) | [✓ / ⚪ / ✗] | Every cite is tagged `[model knowledge — verify]` |
+| CourtListener (citation verification) | [✓ / ⚪ / ✗] | Cites come from the dated relief cards (`[statute / regulator site]`); anything not on a card is tagged `[model knowledge — verify]` |
 
 *Re-check: `/record-clearance-legal:cold-start-interview --check-integrations`*
 
@@ -85,7 +85,7 @@ Setup must be run by the supervising attorney. Staff and volunteers run the impo
 
 **State:** [PLACEHOLDER — CA] *(From company-profile.md)*
 
-Version 0.2 ships relief cards for California only (`skills/eligibility-screen/references/relief/`). If the state here is anything other than CA, every screen stops with a hard stop until a card set for that state exists. See `skills/eligibility-screen/references/relief/_template.md` for how to add one. Do not run a California screen on another state's facts.
+This version ships relief cards for California only (`skills/eligibility-screen/references/relief/`). If the state here is anything other than CA, every screen stops with a hard stop until a card set for that state exists. See `skills/eligibility-screen/references/relief/_template.md` for how to add one. Do not run a California screen on another state's facts.
 
 **Counties served:** [PLACEHOLDER]
 **Local practice notes:** [PLACEHOLDER — e.g., which district attorney offices accept service by email; whether courts set hearings on dismissal petitions]
@@ -96,7 +96,7 @@ Version 0.2 ships relief cards for California only (`skills/eligibility-screen/r
 
 *Only screened types produce bands. Everything else appears in the report as NOT SCREENED with the referral target named here.*
 
-| Relief type | Screened in v0.2 | Referral target when the facts suggest it |
+| Relief type | Screened | Referral target when the facts suggest it |
 |---|---|---|
 | PC 1203.4 dismissal after probation | yes | |
 | PC 1203.41 dismissal after a felony jail or prison sentence | yes | |
@@ -161,7 +161,7 @@ Turn a row to "yes" only after adding a card for it under `skills/eligibility-sc
 
 ## Plain-language standards
 
-*Applied to anything drafted for an applicant after attorney review; v0.2 produces no client-facing text on its own.*
+*Applied to anything drafted for an applicant after attorney review; the plugin produces no client-facing text on its own.*
 
 **Reading level target:** [PLACEHOLDER — default 6th grade]
 **Prohibited jargon:** [PLACEHOLDER — "pursuant to," "petitioner," "disposition," any Latin]
@@ -192,13 +192,13 @@ Skills prepend the header to screening reports, intake records and any memo they
 > - **Currency:** [currency-watch last verified YYYY-MM-DD, N days ago | stale, treated as a checklist only]
 > - **Before relying:** [the 1 to 2 things the reviewer should actually do, or "ready for your eyes" if clean]
 
-If everything is green, collapse to one line. Don't pad with bullets that all say "no issues."
+If everything is green, collapse to one line: `⚠️ Reviewer note: cards last confirmed YYYY-MM-DD · research connector not connected, cites from the cards, verify before relying · read [id]: n cases, m arrests, nothing missing · no flags · ready for your eyes`. Otherwise keep only the bullets that say something. Don't pad with bullets that all say "no issues."
 
 **The deliverable below is clean.** No banners, no inline meta-commentary. Inline tags are minimal: `[review]` on the lines that need attorney judgment, and source tags only where a cite appears.
 
 **Quiet mode for anything a non-legal or external audience will read.** Keep the header and the reviewer note, consolidate source tags into a footnote, cut skill-fit narration and command handoffs. The deliverable should read like a staff attorney wrote it.
 
-**Next steps decision tree.** After a screen, close with a decision tree: a draft of the OPTIONS, not of the DECISION. The attorney picks; Claude fleshes out. Format:
+**Next steps decision tree.** After a screen, close with a decision tree: a draft of the OPTIONS, not of the DECISION. The attorney picks; Claude fleshes out. Compact reports (the default) use one line: `**What next?** 1 draft the attorney review memo · 2 queue for [supervising attorney] with the flags up front · 3 get more facts as plain-language questions for the applicant · 4 filing checklist for [county] · or tell me what you'd do.` Full reports (`--full`) use the five-option form:
 
 > **What next? Pick one and I'll help you build it out:**
 > 1. **Draft the attorney review memo** — one page: facts relied on, bands, the open questions, the recommended order of work.
@@ -327,7 +327,7 @@ Before running the full checklist, sort the question: is this a **legal question
 The skill's default frameworks, statutes, and procedures are California-specific. When the user, the intake, or the facts involve another state or a federal conviction, recognize it and act on it — don't silently apply California doctrine to non-California facts.
 
 1. **Detect.** Check the practice profile's state. Check the intake (county of conviction, notes). If any conviction is from another state or a federal court, the California framework does not apply to it.
-2. **Assess.** Does the plugin have a card set for this jurisdiction? (Version 0.2: California only.)
+2. **Assess.** Does the plugin have a card set for this jurisdiction? (This version: California only.)
 3. **If no card set:** Say so, clearly: "This plugin screens California convictions only. [Item] is a [jurisdiction] conviction; applying California rules to it would give you a wrong answer that looks right."
 4. **Offer the next step on the decision tree:** route to a practitioner in that jurisdiction, or add a card set via `_template.md`.
 5. **Never produce a confident answer using the wrong jurisdiction's law.** Confident-and-wrong is worse than uncertain-and-flagged.

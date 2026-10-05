@@ -8,9 +8,9 @@ The screen produces five band strings and nothing else. Use them exactly:
 | `NOT ELIGIBLE NOW` | A threshold is not yet met and the record says when it will be | Staff log the recheck date |
 | `NEEDS ATTORNEY REVIEW` | A fact is missing or unsure, a discretionary clause is the only route, or an exclusion may apply | Attorney decides |
 | `AUTOMATIC RELIEF MAY APPLY` | A flag added to an item, never a band on its own: PC 1203.425 may already have granted relief | Whoever reads the RAP sheet checks for the "relief granted" note |
-| `NOT SCREENED` | A relief type outside v0.2, named with its referral target | Referral per the profile |
+| `NOT SCREENED` | A relief type this version does not screen, named with its referral target | Referral per the profile |
 
-Sources: PC 1203.4 and PC 1203.41 text fetched from leginfo.legislature.ca.gov on 2026-10-03 and re-fetched from california.public.law on 2026-10-04; PC 1203.425 text fetched from california.public.law on 2026-10-04. All three `[statute / regulator site]` `[settled — last confirmed 2026-10-04]`. Subdivision pinpoints are given on every rule; the full texts are summarized in `relief/`.
+Sources: PC 1203.4 and PC 1203.41 text fetched from leginfo.legislature.ca.gov on 2026-10-03 and re-fetched from california.public.law on 2026-10-04; PC 1203.425 text fetched from california.public.law on 2026-10-04. All three `[statute / regulator site]`, last confirmed 2026-10-04. A report states that date once, in the reviewer note, and tags each quoted rule `[statute / regulator site]`. Subdivision pinpoints are given on every rule; the full texts are summarized in `relief/`.
 
 ## 1. Client-level gates
 
@@ -27,6 +27,7 @@ Run these first, from `intake.status`. They decide the packet before any case is
 | `registration_290` | `current`, `terminated`, `unsure` | Every prison-sentence item `NEEDS ATTORNEY REVIEW`; every 1203.4 item `NEEDS ATTORNEY REVIEW` | PC 1203.41(a)(6): a state prison felony qualifies only if it "did not result in a requirement to register as a sex offender pursuant to Chapter 5.5 (commencing with Section 290)"; PC 1203.4(b) lists excluded offenses |
 | `fire_camp` | `yes` or `unsure` | Add a `NOT SCREENED` line: PC 1203.4b; note it covers Conservation Camp hand crews, county hand crews and institutional firehouses and lists its own excluded crimes in 1203.4b(a)(1)(A) to (H) | |
 | `trafficking_or_dv_remedies` | `yes` | Add a `NOT SCREENED` line: PC 236.14 and PC 1203.49; add a staff follow-up flag | |
+| `trafficking_or_dv_remedies` | `unknown` or `unsure` (the form did not ask) | No effect on any band and never a reason for `NEEDS ATTORNEY REVIEW`; add one staff follow-up clause under Next steps. The screen does not ask this question itself | |
 | `program_gates` | any `no` | Report "program gate not met" separately from the legal screen; apply the profile's `When a gate fails` rule | program rule, not law |
 
 ## 2. Per-case routing
@@ -37,10 +38,35 @@ For each entry in `intake.cases`:
 - `probation_granted: yes` with `probation_outcome: revoked` and `offense_level: felony` routes to the PC 1203.41 rules in section 4, reading `revocation_custody` as the sentence type. With `offense_level` misdemeanor or infraction it is `NEEDS ATTORNEY REVIEW`: the PC 1203.4 discretionary route and PC 1203.4a are both possible, and 1203.4a(a) speaks of a defendant "not granted probation" `[review]`.
 - `probation_granted: no` with `offense_level` in `misdemeanor`, `infraction`, `felony_reduced_to_misdemeanor` routes to the PC 1203.4a rules in section 3a.
 - `probation_granted: no` with `offense_level: felony` and `sentence` in `jail`, `split_mandatory_supervision`, `prison` routes to section 4; with `sentence: fine_only` it is `NEEDS ATTORNEY REVIEW` (unusual pattern).
-- Name every routed item's **route** from `baseline-questions.md` (for example "PC 1203.4 mandatory route: probation fulfilled") and say whether a declaration is usually needed.
+- Name every routed item's **route** from section 2a (for example "PC 1203.4 mandatory route: probation fulfilled") and say whether a declaration is usually needed.
 - `offense_level: unknown`, `sentence: unknown`, or `probation_granted: unknown` is `NEEDS ATTORNEY REVIEW` with a fact request naming the missing field.
 - A conviction from another state or a federal court is `NOT SCREENED` with the jurisdiction named; California rules are never applied to it.
 - Arrests route to `NOT SCREENED` with the PC 851.91 and 851.93 lines. The screen never states a limitations period; it writes "the attorney confirms whether the limitations period has run."
+
+## 2a. Route determinations
+
+The route names below are the only route names a report uses. Gates clear means `current_supervision: none`, `pending_case: no`, `registration_290: no`, and no exclusion found. Any `unsure` or `unknown` on a field a row depends on makes the row `NEEDS ATTORNEY REVIEW`.
+
+| Facts | Route | Band | Declaration usually needed | Source |
+|---|---|---|---|---|
+| `probation_granted: yes`; `probation_outcome: completed`; gates clear | PC 1203.4 mandatory route: probation fulfilled | LIKELY ELIGIBLE | no | 1203.4(a)(1), "fulfilled the conditions of probation for the entire period" |
+| `probation_granted: yes`; `probation_outcome: terminated_early`; gates clear | PC 1203.4 mandatory route: early discharge | LIKELY ELIGIBLE | no | 1203.4(a)(1), "discharged prior to the termination of the period of probation" |
+| `probation_granted: yes`; `probation_outcome: completed_with_violation` | PC 1203.4 discretionary route: interest of justice | NEEDS ATTORNEY REVIEW | yes | 1203.4(a)(1), "in its discretion and the interest of justice" |
+| `probation_granted: yes`; `probation_outcome: ongoing` | none yet; early termination under PC 1203.3 is the referral | NOT ELIGIBLE NOW, recheck when probation ends | n/a | 1203.4(a)(1), "on probation for an offense" |
+| `probation_outcome: revoked`; `offense_level: felony`; `revocation_custody: split_mandatory_supervision` | PC 1203.41 route: split sentence, one year after completion | LIKELY ELIGIBLE if the year has run, else NOT ELIGIBLE NOW with the recheck date | yes | 1203.41(a)(2), one year after a 1170(h)(5)(B) sentence `[practitioner reading, verify]` |
+| `probation_outcome: revoked`; `offense_level: felony`; `revocation_custody: jail` | PC 1203.41 route: straight county jail, two years after completion | same pattern | yes | 1203.41(a)(2) |
+| `probation_outcome: revoked`; `offense_level: felony`; `revocation_custody: prison` | PC 1203.41 route: state prison, two years after completion; add the PC 1203.42 line when sentenced before October 1, 2011 | same pattern, plus the (a)(6) registration check | yes | 1203.41(a)(2), (a)(6) |
+| `probation_outcome: revoked`; `offense_level` misdemeanor or infraction | PC 1203.4 discretionary route and PC 1203.4a both possible | NEEDS ATTORNEY REVIEW | yes | 1203.4a(a) requires "not granted probation"; treatment of revoked probation is an attorney call `[model knowledge — verify]` |
+| `probation_granted: no`; `offense_level` misdemeanor, infraction or felony_reduced_to_misdemeanor; `judgment_date` at least 12 months ago; `new_conviction_since: no`; gates clear; sentence complied with | PC 1203.4a mandatory route | LIKELY ELIGIBLE | no | 1203.4a(a): "lapse of one year from the date of pronouncement of judgment," "fully complied with and performed the sentence," "lived an honest and upright life" |
+| as above, `judgment_date` less than 12 months ago | PC 1203.4a, waiting period | NOT ELIGIBLE NOW, recheck at judgment plus 12 months | n/a | 1203.4a(a) |
+| as above, `new_conviction_since: yes` | PC 1203.4a discretionary route | NEEDS ATTORNEY REVIEW | yes | 1203.4a(b), "in its discretion and in the interest of justice" |
+| `probation_granted: no`; `offense_level: felony`; `sentence: split_mandatory_supervision` | PC 1203.41 route: split sentence, one year after completion | LIKELY ELIGIBLE if run, else NOT ELIGIBLE NOW | yes | 1203.41(a)(2) |
+| `probation_granted: no`; `offense_level: felony`; `sentence: jail` | PC 1203.41 route: straight county jail, two years after completion | same | yes | 1203.41(a)(2) |
+| `probation_granted: no`; `offense_level: felony`; `sentence: prison` | PC 1203.41 route: state prison, two years after completion; add PC 1203.42 when sentenced before October 1, 2011 | same, plus (a)(6) | yes | 1203.41(a)(2), (a)(6) |
+| `probation_granted: no`; `offense_level: felony`; `sentence: fine_only` | unusual pattern | NEEDS ATTORNEY REVIEW | n/a | none of the three sections fits cleanly |
+| `status.fire_camp: yes` | PC 1203.4b line added whatever the band | referral | n/a | 1203.4b(b)(4): no need to complete supervision |
+
+**Declaration usually needed** mirrors the discretionary routes: when the court "may" rather than "shall," a declaration describing the person's circumstances is the norm `[practice note]`. The exclusion checks that can downgrade a LIKELY ELIGIBLE row are in sections 3, 3a and 4; when `code_section` is blank, say which checks could not run.
 
 ## 3. PC 1203.4 items
 
@@ -114,7 +140,7 @@ PC 1203.41(a)(2) cross-references PC 1170(h)(5)(A) and (B). Since 2015 the text 
 
 PC 1203.425 directs the Department of Justice, "commencing October 1, 2024, and subject to an appropriation in the annual Budget Act, on a monthly basis," to review the state databases and grant relief "without requiring a petition or motion" to people who meet all of its conditions (subds. (a)(1)(A), (a)(2)(A)). The record then carries "a note stating 'relief granted,' listing the date" (subd. (a)(2)(B)). The plugin never sees DOJ records, so this is a flag, not a band.
 
-Add `AUTOMATIC RELIEF MAY APPLY` to an item when the record shows all of the following `[statute / regulator site]` `[settled — last confirmed 2026-10-04]`:
+Add `AUTOMATIC RELIEF MAY APPLY` to an item when the record shows all of the following `[statute / regulator site]`:
 
 - `registration_290: no` (subd. (a)(1)(B)(i): not required to register under the Sex Offender Registration Act);
 - `current_supervision: none` (subd. (a)(1)(B)(ii): no active local, state or federal supervision record);
@@ -126,14 +152,14 @@ Add `AUTOMATIC RELIEF MAY APPLY` to an item when the record shows all of the fol
 
 When the flag does not apply, say which condition fails and when it would be met (for example "felony: four years from 2025-01 runs to 2029-01"); never say the section does not cover felonies, because subclause (II) does.
 
-Text to use: "The Department of Justice reviews records monthly and grants this relief without a petition when its records show eligibility; the RAP sheet then carries a 'relief granted' note next to the entry (PC 1203.425(a)(2)(B)). Check the RAP sheet before filing a petition for this item. A prosecutor or probation department may petition to block automatic relief up to 90 days before the eligibility date (PC 1203.425(b)(1)), and the program depends on an annual appropriation, so a missing note does not mean the person is ineligible."
+Text for the full report (the compact report uses one clause: check the RAP sheet for a "relief granted" note before filing, with the pinpoint): "The Department of Justice reviews records monthly and grants this relief without a petition when its records show eligibility; the RAP sheet then carries a 'relief granted' note next to the entry (PC 1203.425(a)(2)(B)). Check the RAP sheet before filing a petition for this item. A prosecutor or probation department may petition to block automatic relief up to 90 days before the eligibility date (PC 1203.425(b)(1)), and the program depends on an annual appropriation, so a missing note does not mean the person is ineligible."
 
 ## 6. Packet roll-up
 
-1. If any client-level gate is `unsure` or produced a `NEEDS ATTORNEY REVIEW` effect: packet `NEEDS ATTORNEY REVIEW`. Every item band is shown but marked provisional.
+1. If `pending_case` or `current_supervision` is `unsure`, or any row in section 1 produced a `NEEDS ATTORNEY REVIEW` effect: packet `NEEDS ATTORNEY REVIEW`. Every item band is shown but marked provisional. An unknown trafficking or DV answer never triggers this rule.
 2. Else if a client-level disqualifier applies (`pending_case: yes`, `current_supervision: probation`): packet `NOT ELIGIBLE NOW` with the recheck trigger.
 3. Else: packet summary in exactly this form, "LIKELY ELIGIBLE n of m, NOT ELIGIBLE NOW k, NEEDS ATTORNEY REVIEW j", with n, k and j counted over the case entries. A per-item `NOT ELIGIBLE NOW` never becomes the packet band; only a client-level disqualifier does. Example: clean gates, one case `LIKELY ELIGIBLE` and one case `NOT ELIGIBLE NOW` give the packet "LIKELY ELIGIBLE 1 of 2, NOT ELIGIBLE NOW 1, NEEDS ATTORNEY REVIEW 0".
-4. If `cases` is empty: packet "client-level pre-screen only: [no disqualifier found | disqualifier: X]" plus a fact request for the six case fields (county, conviction year, offense level, sentence type, probation granted and outcome, completion month). No per-case band is given.
+4. If `cases` is empty: packet "client-level pre-screen only: [no disqualifier found | disqualifier: X]" plus a fact request for the six case fields (county, conviction year, offense level, sentence type, probation granted and outcome, completion month), in the report template's no-case form. No per-case band is given.
 
 Under-flagging is the one-way door. When two rules point to different bands and the record does not settle it, use `NEEDS ATTORNEY REVIEW` and say why.
 

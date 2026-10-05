@@ -1,34 +1,34 @@
 ---
 name: eligibility-screen
 description: >
-  Screen a normalized record clearance intake against California dismissal
-  statutes (PC 1203.4 and PC 1203.41) and classify each conviction as LIKELY
+  Screen a record clearance intake against California dismissal statutes
+  (PC 1203.4, PC 1203.4a and PC 1203.41) and band each conviction LIKELY
   ELIGIBLE, NOT ELIGIBLE NOW with a recheck date, or NEEDS ATTORNEY REVIEW,
   with an AUTOMATIC RELIEF MAY APPLY flag where PC 1203.425 may already have
-  acted. Also screens PC 1203.4a. With no record, walks an attorney through a
-  short set of questions from memory or the court file. Produces an
-  attorney-review packet, never a determination. Use when staff ask "is this
-  person eligible", "screen this intake", "walk me through one", or right
-  after /record-clearance-legal:intake-import.
-argument-hint: "[path to a normalized intake record, paste it, or --interactive]"
+  acted. Takes a normalized record, pasted intake answers or prose, or, with
+  nothing, asks an attorney a short set of questions from memory. Produces a
+  short attorney-review screen, never a determination. Use when staff ask "is
+  this person eligible", "screen this intake", "walk me through one", or paste
+  an intake.
+argument-hint: "[record path or paste | intake answers or prose | --interactive] [--full] [--no-confirm]"
 ---
 
 # /eligibility-screen
 
-1. Load `~/.claude/plugins/config/claude-for-legal/record-clearance-legal/CLAUDE.md` (and `~/.claude/plugins/config/claude-for-legal/company-profile.md`). Stop if the profile is missing or still has `[PLACEHOLDER]` markers.
-2. Step 0 stop conditions: `## Jurisdiction` State must be CA; read `references/currency-watch.md` and announce staleness past 90 days; probe the research connector.
-3. Read `references/screening-bands.md` and the cards in `references/relief/`. The bands file is the rulebook; apply it exactly.
-4. Read the record, or, when there is none, run the baseline interview in `references/baseline-questions.md`. Refuse any record that carries a name, contact detail or date of birth.
-5. Program gates, then client-level gates, then per-item screen, automatic relief flag, not-screened lines, roll-up.
-6. Output with `references/report-template.md`. Close with the decision tree from the profile's `## Outputs`.
+Paths below are relative to the plugin root. The profile is `~/.claude/plugins/config/claude-for-legal/record-clearance-legal/CLAUDE.md`.
 
-```
-/record-clearance-legal:eligibility-screen references/sample-intakes/01-likely-eligible.md
-```
+1. Step 0, once per session: profile present (leftover placeholders become named defaults, except State); State is CA or stop; currency check; research connector probe.
+2. Read the input: a normalized record, pasted intake answers or prose (map them, drop identifiers), or nothing (the interview in `skills/eligibility-screen/references/baseline-questions.md`). Then the verification checklist: numbered yes-or-no lines the user confirms before the screen; `--no-confirm` or "just screen" skips it.
+3. Apply the rulebook, `skills/eligibility-screen/references/screening-bands.md`: program gates, client-level gates, per-item routes, automatic relief flag, recheck arithmetic, roll-up.
+4. Write the compact report from `skills/eligibility-screen/references/report-template.md`; `--full` gives the long form. Close with the decision tree.
 
 ```
 /record-clearance-legal:eligibility-screen
-(then paste the normalized record)
+(then paste the intake answers, a normalized record, or describe the conviction)
+```
+
+```
+/record-clearance-legal:eligibility-screen references/sample-intakes/01-likely-eligible.md --full
 ```
 
 ---
@@ -37,126 +37,124 @@ argument-hint: "[path to a normalized intake record, paste it, or --interactive]
 
 ## Purpose
 
-Staff at a record clearance program spend their first hour with every applicant answering one question: is there anything here worth an attorney's time, and what is missing before the attorney can say so? This skill answers that question from the intake alone, in the attorney's language, with every rule pinned to a subdivision of the statute and every uncertainty flagged where the attorney will see it.
+Staff at a record clearance program spend their first hour with every applicant on one question: is there anything here worth an attorney's time, and what is missing before the attorney can say so? This skill answers it from the intake alone, in the attorney's language, with every rule pinned to a subdivision and every uncertainty flagged where the attorney will see it.
 
-**What it doesn't do:** decide eligibility. It routes. It does not read a RAP sheet, does not evaluate code-section lists, does not consider Proposition 47, Proposition 64 or PC 17(b), does not draft a petition, and does not talk to the applicant. With no record it asks the attorney questions instead. Those belong to the attorney, to full analysis, or to a later version.
+**What it does not do.** Decide eligibility (it routes). Read a RAP sheet or any document. Evaluate code-section lists, Proposition 47, Proposition 64 or PC 17(b). Compute a date from a bucket. Draft a petition. Talk to the applicant. Screen outside California. Those belong to the attorney, to full analysis, or to a later version.
 
 **Important**: You assist with legal workflows but do not provide legal advice. All analysis should be reviewed by qualified legal professionals before being relied upon.
 
 ## Load context
 
-`~/.claude/plugins/config/claude-for-legal/record-clearance-legal/CLAUDE.md` sections `## Who's using this`, `## Program eligibility gates`, `## Jurisdiction`, `## Relief types enabled`, `## Review model`, `## Referral targets`, `## Outputs`, `## Shared guardrails`.
+Profile sections: `## Who's using this`, `## Program eligibility gates`, `## Jurisdiction`, `## Relief types enabled`, `## Review model`, `## Referral targets`, `## Outputs`, `## Shared guardrails`.
 
-Plugin references: `references/screening-bands.md` (the rulebook), `references/baseline-questions.md` (the interview and route names), `references/relief/pc-1203-4.md`, `references/relief/pc-1203-4a.md`, `references/relief/pc-1203-41.md`, `references/relief/not-screened.md`, `references/report-template.md`, and `../../references/currency-watch.md`.
+Plugin files, by trigger (paths from the plugin root):
+
+| File | Load when |
+|---|---|
+| `skills/eligibility-screen/references/screening-bands.md` | always; it is the rulebook |
+| `skills/eligibility-screen/references/report-template.md` | always |
+| `references/currency-watch.md` | once per session, in Step 0 |
+| `skills/eligibility-screen/references/baseline-questions.md` | the input is prose, pasted answers, or nothing |
+| `skills/intake-import/references/intake-schema.md` | mapping pasted answers or prose, or echoing a record |
+| `skills/eligibility-screen/references/relief/pc-1203-4.md` | a case routes to rulebook section 3 |
+| `skills/eligibility-screen/references/relief/pc-1203-4a.md` | a case routes to section 3a |
+| `skills/eligibility-screen/references/relief/pc-1203-41.md` | a case routes to section 4 |
+| `skills/eligibility-screen/references/relief/not-screened.md` | a NOT SCREENED line is needed |
+| `skills/eligibility-screen/references/county-filing-guide.md` | an item is on a petition route and has a county, or someone asks what to file; read only that county's row and section |
+| `skills/eligibility-screen/references/engine-crosswalk.md` | someone asks for an engine label |
+
+Precedence when texts differ: the profile, then the rulebook, then this file, then the interview spine.
 
 ## Workflow
 
-### Step 0: Preconditions
+### Step 0: Preconditions (once per session)
 
-Three checks, in this order. Each one can end the run.
+Run these on the first screen of a session. On later screens in the same session, skip to Step 1 unless the profile changed.
 
-**Profile.** If the config file is missing or contains `[PLACEHOLDER]`, print the setup message from the profile's header comment and stop.
+**Profile.** Missing: print the setup message from the profile template's header comment and stop. Present but with `[PLACEHOLDER` markers: list the sections that still carry them, use the template's stated default for each, carry "Defaults applied: [sections]" into the reviewer note, and continue. One exception: a placeholder in `## Jurisdiction` State is a stop; the state must be set before any screen. Test runs: when the session's system prompt names an alternate profile path for an evaluation, read that file instead of the home path and write "test profile" in the reviewer note's Sources line.
 
 **Jurisdiction hard stop.** Read `## Jurisdiction` → State. If it is anything other than `CA`, print this and stop:
 
-> This plugin ships relief cards for California only. Your profile's state is [state]. I will not run a California screen on [state] facts; the waiting periods, exclusions and procedures would be wrong while looking right. To screen [state] convictions, add a card set under `skills/eligibility-screen/references/relief/` using `_template.md` (one card per relief type, written from [state]'s current statute text), add a `[state]` routing section to `references/screening-bands.md`, and re-run. Until then, route [state] matters to a practitioner there.
+> This plugin ships relief cards for California only. Your profile's state is [state]. I will not run a California screen on [state] facts; the waiting periods, exclusions and procedures would be wrong while looking right. To screen [state] convictions, add a card set under `skills/eligibility-screen/references/relief/` using `_template.md` (one card per relief type, written from [state]'s current statute text), add a `[state]` routing section to `screening-bands.md`, and re-run. Until then, route [state] matters to a practitioner there.
 
 Do not fall back to California rules. Do not screen "provisionally." The silent-degradation case is the failure this stop exists to close.
 
-**Currency.** Read `references/currency-watch.md`. Compute the days since its `Last verified` date. If more than 90, add to the reviewer note: "currency-watch last verified [date], [N] days ago; stale, treated as a checklist only," and add one line under the bottom line saying the statute cards may be out of date.
+**Currency.** Read `references/currency-watch.md`. The watch is current until the January 1 after its `Last verified` date, because California statutes take effect then; it is stale earlier if an entry names a pending change whose effective date has passed. If the clinic's verification log (next to the profile) has a newer entry for the currency watch, use that entry's date. When stale, add to the reviewer note "currency-watch last verified [date]; stale, treated as a checklist only" and one line under Overall saying the statute cards may be out of date.
 
-**Research connector.** If CourtListener (or another research MCP) is configured, make one cheap call to see whether it responds. Record the result in the reviewer note's **Sources** line: `research connector: CourtListener ✓ verified` only if a call succeeded this session; otherwise `not connected, cites from the relief cards and training knowledge, verify before relying`.
+**Research connector.** If CourtListener (or another research MCP) is configured, make one cheap call to see whether it responds. Record the result in the reviewer note's Sources line: `research connector: CourtListener ✓ verified` only if a call succeeded this session; otherwise `not connected, cites from the cards, verify before relying`.
 
-### Step 1: Read the record
+### Step 1: Read the input
 
-Accept a file path or pasted text. The record must have the shape in `../intake-import/references/intake-schema.md`: `record_id`, `source`, `program_gates`, `person`, `status`, `cases`, `arrests_without_conviction`, `consents`.
+Three kinds of input. Each ends with the verification checklist: the facts the screen will rely on, as numbered yes-or-no lines the user confirms before the screen runs. The user can skip it ("just screen", `--no-confirm`).
 
-- If the record contains a name, email address, phone number, street address, date of birth, Social Security number or CII number, stop and say: "This record contains [field]. The screen never reads identifiers. Run `/record-clearance-legal:intake-import` first; it drops them and keeps initials or a clinic ID." Do not echo the value.
-- A missing `status` field is `unsure`; a missing case field is `unknown`. Both are review triggers under the bands file, and both go in the facts-to-confirm list.
-- `cases: []` is valid. The run then produces a client-level pre-screen (Step 7, rule 4) and a fact request. Never invent a case.
+**A normalized record** (a file path, or a paste in the shape of `skills/intake-import/references/intake-schema.md`): accept the keys in any order. A missing `status` field is `unsure`, a missing case field is `unknown`; both are review triggers and go in facts to confirm. `cases: []` is valid and produces the no-case reply (Step 7). Never invent a case.
 
-Record what you read for the reviewer note: record ID, number of cases, number of arrests, missing fields.
+**Pasted intake answers or prose** (form question-and-answer lines, an export row with its header, or a sentence or two about a person's convictions): map them with the schema's mapping table and the profile's field-map overrides, using the import skill's conventions: "I'm not sure" is `unsure` on a status field and `unknown` on a case field; "community supervision" is `mandatory_supervision` with a flag to confirm mandatory supervision versus post-release community supervision; a question the form did not ask is `unknown`, never a guessed no. Then run the interview in `baseline-questions.md` for whatever the paste left unknown and route-relevant: at most two questions per turn, never a question the paste answered, never a question that cannot change the route. Never ask the trafficking or domestic violence question; when the form did not ask it, record `unknown` and let a one-clause staff follow-up under Next steps carry it. When the input gives no initials or clinic ID, ask for them in the first question turn; that turn may carry three items when one of them is the initials, so county and year still go together. Until then `person.reference` is `unknown`. Build `record_id` as `[source]-[received]-[reference]`.
 
-**Interactive path.** When the user gives no record, pastes prose about a person's convictions, or asks to be walked through (or passes `--interactive`), run the baseline interview in `references/baseline-questions.md`. First, map everything the prose already said onto the record fields and show that draft; then ask only the questions whose fields are still `unknown` or `unsure`, in the reference's order, at most two per turn, offering the listed options and stopping as soon as a route is settled. Do not re-ask a question the prose answered, and do not ask a question whose answer cannot change the route. Build the record as YAML in the exact shape, field names and vocabularies of `../intake-import/references/intake-schema.md` (copy the schema's block and fill it; do not invent keys), echo it in a fenced block, get a yes, then continue from Step 2. Never ask for a RAP sheet or a document; if one is offered, say the screen does not read documents and continue with the questions. "Not sure" becomes `unsure` or `unknown` and the bands flag it.
+**Nothing, or `--interactive`**: run the interview from the start, prose first, then only the gaps.
+
+**Identifiers, on every input.** Before echoing anything, look for a name, email address, phone number, street address, date of birth, Social Security number, CII number, attorney name, case number, registry date or attachment link. Drop each one, set `person.reference` to initials or the clinic ID per the profile's identifier policy, and print one line: "Dropped at import: [categories]". Never print a dropped value anywhere: not in the record, the echo, the report or your own summary. From here on the person is `person.reference`. If the paste is a RAP sheet or a court document, stop and say the plugin never reads those; ask for the intake answers only.
+
+**Verification checklist.** Before screening, list the facts the screen will rely on as numbered yes-or-no lines in plain words, in this order: the four client-level gates (supervision today, pending case, registration, fire camp), then for each case one line for what it is (section, level, county, year) and one for how it ended (probation grant and outcome, or custody type and completion month; judgment month and any new conviction on the PC 1203.4a route), then the program gates. Close with: "Reply yes to confirm all and I will screen, or give the number and the correction. Say record to see the full YAML." Then stop and wait. On yes (or proceed, go, correct), screen. On a correction, change the field, show only the changed lines, and ask again. On record, show one fenced YAML block in the schema's names with only the fields the screen uses, and ask again. Skip the checklist only when the user asked to ("just screen", "no need to confirm", `--no-confirm`); then go straight to the screen. Never ask for a RAP sheet or a document; if one is offered, say the screen does not read documents and continue. The YAML shown on request uses the schema's names and only the fields the screen uses: `record_id`, `source`, `received`, `person.reference`; the five `status` gates plus `supervision_ended_within_3_years` when it is not `none`; for each case `id`, `county`, `conviction_year`, `offense_level`, `code_section`, `sentence`, `probation_granted`, `probation_outcome`, `revocation_custody` when revoked, `judgment_date` and `new_conviction_since` on the PC 1203.4a route, `sentence_completed`, `notes`; arrests as `id`, `year`, `county`, `charges_filed`.
+
+Record for the reviewer note: record ID, cases, arrests, missing fields, categories dropped.
 
 ### Step 2: Program gates
 
-Compare `program_gates` with `## Program eligibility gates`. Report each gate as met, not met, or not required. A failed required gate is a program decision, not a legal one: say so first, apply the profile's "When a gate fails" rule, and if the profile is silent, run the legal screen anyway and mark the packet "program gate not met" so the attorney can decide on a referral with the screen in hand.
+Compare `program_gates` with `## Program eligibility gates`. Report each gate as met, not met, or not required. A failed required gate is a program decision, not a legal one: say so first, apply the profile's "When a gate fails" rule, and if the profile is silent, run the legal screen anyway and mark the screen "program gate not met" so the attorney can decide on a referral with the screen in hand.
 
 ### Step 3: Client-level gates
 
-Apply `references/screening-bands.md` section 1 to `status`, field by field, and fill the Client-level gates table in the report: gate, answer, effect on the packet, rule with subdivision. These run before any case is looked at. An `unsure` on `pending_case` or `current_supervision` makes every later band provisional; say so in the bottom line.
+Apply rulebook section 1 to `status`, field by field, before any case is looked at. In the compact report this is one sentence in the Overall line: "clear" with the five answers in parentheses, or the gate that fired and its effect. An unknown trafficking or DV answer is not a gate that fired; it is a follow-up clause. An `unsure` on `pending_case` or `current_supervision` makes every later band provisional; say so in the Overall line.
 
 ### Step 4: Per-item screen
 
-Route each case with section 2 of the bands file, then apply section 3 (PC 1203.4), section 3a (PC 1203.4a) or section 4 (PC 1203.41). For each case write one row: item, the facts used (field values, nothing else), band, the rule applied with its subdivision, the source tag from the card, and flags. Rules:
+Route each case with rulebook sections 2 and 2a, then apply section 3 (PC 1203.4), 3a (PC 1203.4a) or 4 (PC 1203.41). Copy the route name, the declaration line, the exclusion checks and the next-step text from the rulebook; do not restate them from memory. Skill rules on top:
 
 - Use only the five band strings. Never write "eligible" or "ineligible" as a conclusion.
-- Name the route in the Route and rule cell using the names in `references/baseline-questions.md` (for example "PC 1203.4 mandatory route: probation fulfilled"), followed by the subdivision, and state in Next steps by item whether a declaration is usually needed.
 - Quote the card, not memory. If a rule you need is not on a card, say so, tag the item `[model knowledge — verify]`, and route it to `NEEDS ATTORNEY REVIEW`.
-- When `code_section` is blank on a PC 1203.4 or PC 1203.4a item, say the exclusion check (1203.4(b) and (c), or 1203.4a(d)) could not be run and list it under facts to confirm. On a PC 1203.41 item there is no such check; the only exclusion is registration on a state prison felony (1203.41(a)(6)), so do not list one.
-- Arrests in `arrests_without_conviction` are `NOT SCREENED`; print the PC 851.91 and PC 851.93 referral lines from `not-screened.md`. Never state a limitations period or a number of years for one; PC 851.91 turns on it and the attorney determines it. Write "the attorney confirms whether the limitations period has run."
-- A conviction from another state or a federal court is `NOT SCREENED`, with the jurisdiction named, and the packet notes it.
-- For every `LIKELY ELIGIBLE` item, copy the card's next-step text (petition in the court of conviction, 15 days' notice to the prosecutor, restitution not a bar) into the report's **Next steps by item** section, with the subdivision cites.
-- Never list restitution as a fact to confirm; an unpaid order is not a ground for denial (PC 1203.4(c)(3)(A), PC 1203.41(d)).
-- Any Vehicle Code `code_section` on a 1203.4 item routes to `NEEDS ATTORNEY REVIEW` (PC 1203.4(c)(1), (c)(2)); when the code section is blank, ask whether it was a Vehicle Code offense.
+- The rulebook's standing rules apply every time, and these are the ones runs most often miss: restitution is never a fact to confirm; any Vehicle Code section on a PC 1203.4 item is attorney review; no limitations period is ever stated for an arrest; a PC 1203.41 item has no (b) or (c) check; when `code_section` is blank on a PC 1203.4 or PC 1203.4a item, say which exclusion check could not run and list it under facts to confirm.
+- A conviction from another state or a federal court is `NOT SCREENED` with the jurisdiction named.
 
 ### Step 5: Automatic relief flag
 
-Apply section 5 of the bands file. The flag attaches to an item; it is never the item's band. Print the standard text about the "relief granted" note.
+Apply rulebook section 5. The flag attaches to an item; it is never the item's band. Compact report: one clause with the pinpoint and "check the RAP sheet for a 'relief granted' note before filing", or the condition that fails and when it is met. Full report: the rulebook's standard text.
 
 ### Step 6: Recheck arithmetic
 
 When a waiting period has not run:
 
-- Compute the recheck date as the completion month plus the period, from `sentence_completed`, never from a bucket alone. Show the arithmetic ("2025-08 + 24 months = 2027-08") and tag it `[model calculation — verify]`.
+- Compute the recheck date as the completion month plus the period, from `sentence_completed` (or `judgment_date` on the PC 1203.4a route), never from a bucket alone. Show the arithmetic ("2025-08 + 24 months = 2027-08") and tag it `[model calculation — verify]`.
 - When `notes` give two candidate dates (release from custody, discharge from supervision), compute both, show both, and add `[review]` asking which one is "completion of the sentence" under PC 1203.41(a)(2). If the two readings give different bands (one period has run, the other has not), the item is `NEEDS ATTORNEY REVIEW`; if both give the same band, keep it.
-- When the sentence type could be mandatory supervision or PRCS, compute the recheck date under each reading, put both dates in the item's Flags cell, and add `[review]` on the supervision type. If both readings give the same band, keep that band; if they diverge, use `NEEDS ATTORNEY REVIEW`.
+- When the sentence type could be mandatory supervision or post-release community supervision, compute the recheck date under each reading, show both, and add `[review]` on the supervision type. Same band under both readings: keep it. Different bands: `NEEDS ATTORNEY REVIEW`.
 - Use the session date as today. Say what date you used.
 
 ### Step 7: Not screened and roll-up
 
-List the relief types the facts suggest from `## Relief types enabled` rows marked "no" or "flag only," each with its referral line from `not-screened.md` and the referral target from the profile. List only the types the facts suggest (a fire camp answer, an arrest, a misdemeanor without probation, a trafficking flag); do not enumerate types the record gives no reason to raise. Always add the standing line: "Proposition 47, Proposition 64 and PC 17(b) were not evaluated; full analysis decides them."
+List the relief types the facts suggest from `## Relief types enabled` rows marked "no" or "flag only", each as one Next-steps bullet with its referral line from `not-screened.md` and the referral target from the profile. List only the types the facts raise (a fire camp answer, an arrest, a trafficking flag, a pre-realignment prison term); do not enumerate types the record gives no reason to raise. Always add the one-line standing bullet: "Not evaluated: Proposition 47, Proposition 64 and PC 17(b); full analysis decides them."
 
-Then roll up with section 6 of the bands file: `NEEDS ATTORNEY REVIEW` if any client-level gate was unsure or flagged; else `NOT ELIGIBLE NOW` only if a client-level disqualifier applies (`pending_case: yes` or `current_supervision: probation`); else the count summary in exactly the form "LIKELY ELIGIBLE n of m, NOT ELIGIBLE NOW k, NEEDS ATTORNEY REVIEW j"; or, with no cases, the client-level pre-screen plus the fact request for the six case fields. A per-item `NOT ELIGIBLE NOW` never becomes the packet band.
+**Filing bullet.** For each item on a petition route (LIKELY ELIGIBLE, or NEEDS ATTORNEY REVIEW on a discretionary route), add one Next-steps bullet "Filing in [county]:" from `county-filing-guide.md`: the petition and order forms, the proof-of-service form, who is served and how, the declaration form only when a declaration is usually needed, and one local point (hearing date before filing, wet signature, copies, e-filing) when the county has one. A county not in the table gets the guide's statewide default and says so. Tag the bullet `[county filing guide, imported 2026-10-04 — verify with the court]`. List forms for relief this plugin does not screen only when the facts raised it (a fire camp answer), and never invent a service address or email; use only what the guide records. This is guidance about what to file; the plugin does not fill or file forms.
+
+Then roll up with rulebook section 6: `NEEDS ATTORNEY REVIEW` if any client-level gate was unsure or flagged; else `NOT ELIGIBLE NOW` only if a client-level disqualifier applies (`pending_case: yes` or `current_supervision: probation`); else the count summary in exactly the form "LIKELY ELIGIBLE n of m, NOT ELIGIBLE NOW k, NEEDS ATTORNEY REVIEW j"; or, with no cases, the template's no-case form with the six-fact request. A per-item `NOT ELIGIBLE NOW` never becomes the overall band.
 
 ### Step 8: Review model routing
 
-Read `## Review model`. Formal review queue: add `QUEUED for [supervising attorney]` under the bottom line and name the queue location. Configurable flags: when a trigger in the profile fires, add `CHECK WITH [attorney] BEFORE ACTING`. Lighter-touch: no extra line.
+Read `## Review model`. Formal review queue: add `QUEUED for [supervising attorney]` to the Overall line and name the queue location. Configurable flags: when a trigger in the profile fires, add `CHECK WITH [attorney] BEFORE ACTING`. Lighter-touch: no extra line.
 
 ### Step 9: Write the report
 
-Use `references/report-template.md` exactly: the header line first, the reviewer note next, then the report. Keep the body clean (no narration of what you read; that lives in the reviewer note). Every date you computed carries `[model calculation — verify]`; every judgment call carries `[review]`; every cite carries its source tag.
+Compact form from the template by default; the full form with `--full`, or when the user asks for the long version afterwards. Header first, reviewer note second (one line when green), then the body. Every computed date carries `[model calculation — verify]`; every judgment call carries `[review]`; each quoted rule carries one source tag. Omit empty sections. Next steps are actions, one per item, never a restatement of the item block; "Program gates met" is three words when they are met; the review-model line is the profile's phrase only. Keep a clean one-case screen near 300 words including its filing bullet; length grows only with cases, flags and review questions. For more than about ten records in a session, offer the summary table from the profile's `## Outputs` instead of ten reports.
 
 ### Step 10: Close
 
-End with "**One question I'd ask that isn't in my checklist:**" when you have a real one, then the decision tree from the profile's `## Outputs`, with all five screening options in the template's order; do not reorder or drop options. When the user picks one, do that thing; do not re-explain the screen.
+Add "**One question I'd ask that isn't in my checklist:**" as one sentence when you have a real one; otherwise omit the line. Then the decision tree: in the compact form the one-line, four-option tree from the template (memo, queue, more facts, filing checklist for the county); in the full form the five-option tree from the profile's `## Outputs`, in order. When the user picks one, do that thing; do not re-explain the screen. The filing checklist is the template's on-request form: the county's row and notes from `county-filing-guide.md` under the header and a one-line reviewer note.
 
-## Output
+## Worked examples
 
-See `references/report-template.md`. The first line of every report is the work-product header from the profile's `## Outputs`. The last block is the decision tree.
+Compact blocks from the sample intakes, today taken as 2026-10-04.
 
-## Worked rows
-
-From `references/sample-intakes/01-likely-eligible.md` and `02-not-yet.md`, the per-item table looks like this (today taken as 2026-10-04):
-
-| Item | Facts used | Band | Rule applied | Source | Flags |
-|---|---|---|---|---|---|
-| C1 (01) | misdemeanor; probation_granted yes; probation_outcome completed; code_section PC 484(a) | LIKELY ELIGIBLE | PC 1203.4 mandatory route: probation fulfilled; (a)(1) first clause; not serving, on probation or charged; declaration usually needed: no | `[statute / regulator site]` `[settled — last confirmed 2026-10-04]` | AUTOMATIC RELIEF MAY APPLY (PC 1203.425(a)(1)(B)(iv)(I)(ia)); PC 1203.4(b) check run: PC 484(a) not listed |
-| C2 (02) | felony; sentence prison; sentence_completed unknown; notes: released 2024-02, parole discharged 2025-08 | NEEDS ATTORNEY REVIEW | PC 1203.41(a)(2): two years after completion of a state prison sentence; the two readings of completion diverge (2026-02 has passed, 2027-08 has not) | `[statute / regulator site]` `[settled — last confirmed 2026-10-04]` | recheck 2025-08 + 24 months = 2027-08, or 2024-02 + 24 months = 2026-02 `[model calculation — verify]`; `[review]` which date is completion of the sentence; PC 1203.41(a)(6) satisfied by registration_290 no |
-| A1 (02) | arrest 2015; charges_filed no | NOT SCREENED | PC 851.91 petition if the limitations period has run; PC 851.93 automatic relief may already appear | `[statute / regulator site]` | referral per profile |
-| C2 (03) | felony; sentence split_mandatory_supervision; sentence_completed 2026-02; notes: applicant called it community supervision | NOT ELIGIBLE NOW (same band under both readings) | PC 1203.41(a)(2): one year after a PC 1170(h)(5)(B) sentence, two years after a prison term followed by PRCS | `[statute / regulator site]` `[settled — last confirmed 2026-10-04]` | as mandatory supervision: 2026-02 + 12 months = 2027-02; as PRCS after prison: 2026-02 + 24 months = 2028-02 `[model calculation — verify]`; `[review]` which supervision type it was |
-
-## What this skill does NOT do
-
-- **Decide eligibility.** Bands are routing for the supervising attorney.
-- **Read RAP sheets or documents.** It reads the normalized record only.
-- **Evaluate code-section lists.** Proposition 47, Proposition 64, PC 17(b) and any "is this offense a wobbler" question go to full analysis.
-- **Ask for documents.** The interactive path asks questions; it never asks for a RAP sheet.
-- **Compute from buckets.** A "less than 2 years ago" answer produces a fact request, not a date.
-- **Communicate with the applicant.** Plain-language questions it drafts go to the attorney first.
-- **Screen outside California.** The hard stop is not overridable from the conversation.
-
-## Close with the next-steps decision tree
-
-End with the decision tree per the profile's `## Outputs`. The five default branches are: draft the attorney review memo, queue for the supervising attorney, get more facts, log recheck dates, something else. The tree is the output; the attorney picks.
+- **C1 (fixture 01), PC 484(a) misdemeanor, Sample County 2017: LIKELY ELIGIBLE.** PC 1203.4 mandatory route: probation fulfilled; subdivision (a)(1), first clause; probation completed 2019-06, no violations. Declaration usually needed: no. PC 1203.4(b) and (c) checks run: not listed, not a Vehicle Code offense. AUTOMATIC RELIEF MAY APPLY: check the RAP sheet for a "relief granted" note before filing (PC 1203.425(a)(1)(B)(iv)(I)(ia)). `[statute / regulator site]`
+- **C2 (fixture 02), felony, state prison, section not known: NEEDS ATTORNEY REVIEW.** PC 1203.41 route: state prison, two years after completion; subdivision (a)(2). The notes give two completion dates and the readings diverge: released 2024-02 + 24 months = 2026-02, which has run; parole discharged 2025-08 + 24 months = 2027-08, which has not `[model calculation — verify]`. `[review]` Which date is "completion of the sentence"? Registration check under (a)(6) satisfied by `registration_290: no`. No (b) or (c) check applies to this section. `[statute / regulator site]`
+- **A1 (fixture 02), 2015 arrest, no charges filed: NOT SCREENED.** PC 851.91 petition if the limitations period has run, which the attorney confirms; PC 851.93 relief may already appear on the record. Referral: the target named in the profile. `[statute / regulator site]`
+- **Filing in Mono County** (a LIKELY ELIGIBLE PC 1203.4 item, declaration not usually needed): CR-180 petition, CR-181 order, CR-106 proof of service by mail; serve the DA by mail; mail or in-person filing; every case gets a hearing the court sets about a month out. `[county filing guide, imported 2026-10-04 — verify with the court]`
+- **C2 (fixture 03), felony, split sentence ended 2026-02, called "community supervision" by the applicant: NOT ELIGIBLE NOW.** PC 1203.41 route; subdivision (a)(2). Same band under both readings: as mandatory supervision, 2026-02 + 12 months = 2027-02; as post-release community supervision after a prison term, 2026-02 + 24 months = 2028-02 `[model calculation — verify]`. `[review]` Which supervision type was it? Log both dates. `[statute / regulator site]`

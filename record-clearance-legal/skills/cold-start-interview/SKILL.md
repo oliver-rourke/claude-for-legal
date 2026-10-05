@@ -13,7 +13,7 @@ argument-hint: "[--redo] [--check-integrations] [--full]"
 # /cold-start-interview
 
 1. Check `~/.claude/plugins/config/claude-for-legal/record-clearance-legal/CLAUDE.md`. If populated and no `--redo`, confirm before overwriting.
-2. Run the interview below, starting with Part 0 (supervising-attorney role check, ethical preconditions, what's connected). If the user is not the supervising attorney, stop and redirect.
+2. Run the interview below, starting with Part 0 (supervising-attorney role check and what's connected; the ethical preconditions are recorded in full setup, and the quick start asks one yes or no). If the user is not the supervising attorney, stop and redirect.
 3. Quick start (2 minutes): organization, supervising attorney, state and counties, review model, intake source. Full setup (10 minutes) adds program gates, field map confirmation, relief-type referral targets, referral links, plain-language standards, seed documents.
 4. Migration: if a populated profile (no `[PLACEHOLDER]`) exists at `~/.claude/plugins/cache/claude-for-legal/record-clearance-legal/*/CLAUDE.md` but not at the config path, copy it forward and show what was migrated.
 5. Write the profile from the template shipped with the plugin (`CLAUDE.md` in the plugin root), filling every section; mark skipped answers `[DEFAULT]`.
@@ -67,15 +67,15 @@ After the choice, orient the attorney in your own voice: what the profile holds,
 ## Interview pacing
 
 - **Assume the answer exists somewhere.** For anything longer than a sentence (consent texts, a referral list, an export header), ask for a paste or a link before asking the attorney to type it.
-- **Pause for real answers.** Ethical preconditions and the field map need typed answers. Say "this one needs a typed answer, I'll wait," and wait.
-- **Two or three answerable prompts per turn,** counting subparts. Prefer tap-through options.
+- **Pause for real answers.** In full setup, the ethical preconditions and the field map need typed answers. Say "this one needs a typed answer, I'll wait," and wait.
+- **Two or three answerable prompts per turn,** counting subparts. Prefer tap-through options. Quick start runs in about six turns: role plus the ethics yes or no; organization, program name and client population; languages and the full-analysis partner; state, counties and local notes; review model and queue; intake source, identifier policy and field map.
 - **Pause and resume.** On "pause" or "stop," write a partial profile with `<!-- SETUP PAUSED AT: [section] -->` at the top and `[PENDING]` on unanswered fields; on re-run, greet and resume without re-asking.
 - **Verify user-stated legal facts as they come up.** If the attorney states a waiting period, a statute or a form, sanity-check it against the relief cards before writing it into the profile; surface conflicts with `[premise flagged — verify]`.
 - **Before writing,** list every skipped or placeholder answer and ask whether to fill it now. Never write silent gaps.
 
 ## The interview
 
-### Part 0: Who's running this setup, ethical preconditions, and what's connected
+### Part 0: Who's running this setup and what's connected (quick and full); ethical preconditions (full)
 
 **Role.**
 
@@ -85,7 +85,7 @@ After the choice, orient the attorney in your own voice: what the profile holds,
 
 If 2, stop. If 1, record name, bar jurisdiction and bar number under `## Who's using this`.
 
-**Ethical and confidentiality preconditions.** Confirm each, and record the answers:
+**Ethical and confidentiality preconditions (full setup).** Confirm each, and record the answers:
 
 1. **Account tier and data handling.** Which Claude plan the program is on and what its retention and training terms say about client data.
 2. **AI-use practice.** Whether and how the program discloses AI-assisted screening to applicants, per ABA Formal Opinion 512 (2024), the state bar's guidance, and Rules of Professional Conduct 1.1, 1.4, 1.6 and 5.3.
@@ -93,6 +93,8 @@ If 2, stop. If 1, record name, bar jurisdiction and bar number under `## Who's u
 4. **Heightened sensitivity.** Criminal records, immigration exposure, registration status, and trafficking or domestic violence flags carry heightened confidentiality expectations. Confirm whether any of these require extra safeguards or exclusion from the plugin.
 
 If any item is unresolved, flag it in the profile and note that staff should not use the plugin on real applicants until it is resolved.
+
+**Quick start:** do not walk the four items. Ask one question: "Have you confirmed the program's data-handling terms, AI-use disclosure, record retention and sensitive-flag safeguards? yes / not yet." For yes, write "Confirmed by the supervising attorney on [date]; details not recorded, run `/record-clearance-legal:cold-start-interview --full` to record them." For not yet, write "[DEFAULT — not yet confirmed; staff should not use the plugin on real applicants until the supervising attorney confirms these with /record-clearance-legal:cold-start-interview --full]".
 
 **What's connected.** For Typeform, Airtable, Google Drive, Slack and CourtListener: ✓ only after a successful call this session; ⚪ configured but not verified, with a one-line how-to; ✗ not found, with the fallback (paste or CSV for intakes; local files for documents; manual copy for Slack; `[model knowledge — verify]` tags for citations). Core features work with paste alone.
 
@@ -104,7 +106,7 @@ If any item is unresolved, flag it in the profile and note that staff should not
 
 ### Part 2: Jurisdiction (quick and full)
 
-- State. Say plainly: "Version 0.2 ships relief cards for California only. If your state is not CA, setup will complete, but every screen will stop with instructions for adding a state card set until one exists."
+- State. Say plainly: "This version ships relief cards for California only. If your state is not CA, setup will complete, but every screen will stop with instructions for adding a state card set until one exists."
 - Counties served; local practice notes (service methods, hearing practice, declaration expectations).
 
 ### Part 3: Review model (quick and full)
@@ -123,7 +125,7 @@ For each of residency, conviction in service area, prior representation, and any
 
 ### Part 6: Relief types and referral targets (full)
 
-Confirm the two screened types (PC 1203.4, PC 1203.41). For every other row in `## Relief types enabled`, name the referral target. Capture the county referral list link, the out-of-county guidance, and the RAP sheet acquisition page.
+Confirm the three screened types (PC 1203.4, PC 1203.4a, PC 1203.41). For every other row in `## Relief types enabled`, name the referral target. Capture the county referral list link, the out-of-county guidance, and the RAP sheet acquisition page.
 
 ### Part 7: Plain-language standards and seed documents (full)
 
@@ -133,7 +135,7 @@ Reading level, prohibited jargon, required elements for any client-facing text d
 
 Write to `~/.claude/plugins/config/claude-for-legal/record-clearance-legal/CLAUDE.md`, creating directories as needed, using the structure of the template shipped with the plugin. Fill every section. Replace every `[PLACEHOLDER ...]` marker in the template: an answered question gets the answer; a skipped or quick-start question gets `[DEFAULT — <the default value or "not set; add via /record-clearance-legal:customize">]`. Never leave a `[PLACEHOLDER` marker behind, because every other skill stops when it sees one. Before showing the confirmation, search the written file for `[PLACEHOLDER` and fix any hit. Create an empty `verification-log.md` next to it. Then show a short confirmation: role and attorney, state, review model, intake source, gates, and which sections carry defaults.
 
-Quick-start close: "Done. You can run `/record-clearance-legal:intake-import` and `/record-clearance-legal:eligibility-screen` now. I used defaults for gates, referral targets and plain-language standards; when a screen's output feels off, that is usually a default to tune. Run `/record-clearance-legal:cold-start-interview --full` anytime, or `/record-clearance-legal:customize` to change one section."
+Quick-start close: "Done. You can run `/record-clearance-legal:eligibility-screen` now; paste an intake or describe a conviction. `/record-clearance-legal:intake-import` handles exports and connectors. I used defaults for gates, referral targets and plain-language standards; when a screen's output feels off, that is usually a default to tune. Run `/record-clearance-legal:cold-start-interview --full` anytime, or `/record-clearance-legal:customize` to change one section."
 
 ## Offer a test run
 

@@ -45,7 +45,7 @@ The user typed `/record-clearance-legal:customize`. They want to change somethin
 5. **Make the change.** Show the current value, ask for the new value, explain what changes downstream, confirm, write it. Examples:
 
    - *Turning a relief type to "screened":* "I can only mark a row screened when a card exists under `skills/eligibility-screen/references/relief/` and a row exists in `references/currency-watch.md`. There is no card for [type] yet. Want to keep it as a referral, or add a card first using `_template.md`?"
-   - *Changing the state:* "Version 0.2 screens California only. If I set the state to [state], every screen will stop with instructions for adding a state card set. Do that?"
+   - *Changing the state:* "This version screens California only. If I set the state to [state], every screen will stop with instructions for adding a state card set. Do that?"
    - *Review model formal queue → flags:* "Screens will carry CHECK WITH [attorney] BEFORE ACTING when a trigger fires instead of QUEUED. Which triggers?"
    - *Adding a gate:* "The import step will record it; the screen will report it against the rule you give me, separately from the legal bands."
 

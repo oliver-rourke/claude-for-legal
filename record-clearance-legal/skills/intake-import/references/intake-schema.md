@@ -1,6 +1,6 @@
 # Normalized intake record (schema v0.2)
 
-The normalized intake record is the single shape that `/record-clearance-legal:intake-import` writes and `/record-clearance-legal:eligibility-screen` reads. It is plugin-internal. It is not an upload format for any engine, and it never carries a name, contact detail, date of birth, Social Security number, CII number or RAP sheet. A record that contains any of those is refused by the screen and sent back through import.
+The normalized intake record is the single shape that `/record-clearance-legal:intake-import` writes and `/record-clearance-legal:eligibility-screen` reads. It is plugin-internal. It is not an upload format for any engine, and it never carries a name, contact detail, date of birth, Social Security number, CII number or RAP sheet. The screen drops any of those it finds, says which categories it dropped, and never echoes them. Fields marked optional below are carried for the clinic's records; no screening rule reads them.
 
 ## The record
 
@@ -15,22 +15,22 @@ intake:
     prior_representation: yes | no | unknown | not_required
   person:
     reference: "initials or clinic ID only"
-    preferred_language: en | es | other
+    preferred_language: en | es | other   # optional; carried, not screened
   status:
     pending_case: no | yes | unsure
     current_supervision: none | probation | parole | mandatory_supervision | prcs | unsure
     supervision_ended_within_3_years: none | parole | mandatory_supervision | prcs | unsure
-    supervision_ended_bucket: under_1_year | 1_year_or_more | under_2_years | 2_years_or_more | unknown
-    months_since_supervision_ended: integer | unknown
-    other_convictions: yes | no | unknown        # besides the case that carried the supervision
+    supervision_ended_bucket: under_1_year | 1_year_or_more | under_2_years | 2_years_or_more | unknown   # optional; carried, not screened
+    months_since_supervision_ended: integer | unknown   # optional; carried, not screened
+    other_convictions: yes | no | unknown        # optional; besides the case that carried the supervision
     fire_camp: no | yes | unsure
-    fire_camp_year: YYYY | unknown
+    fire_camp_year: YYYY | unknown   # optional; carried, not screened
     registration_290: no | current | terminated | unsure
-    trafficking_or_dv_remedies: no | yes
-    has_rap_sheet: no | yes
+    trafficking_or_dv_remedies: no | yes | unknown   # unknown when the form did not ask; never asked by the screen
+    has_rap_sheet: no | yes   # optional; carried, not screened
   cases: []                            # optional; one entry per conviction, shape below
   arrests_without_conviction: []       # optional; one entry per arrest, shape below
-  consents:
+  consents:                            # optional; carried for clinic records, not screened
     clean_slate_definition: yes | no
     representation_scope: yes | no
     expungement_limits: yes | no
@@ -64,6 +64,10 @@ intake:
   county: "county of arrest"
   charges_filed: no | yes_dismissed | yes_acquitted | unknown
 ```
+
+### Minimal record
+
+The screen reads only these fields: `record_id`, `source`, `received`, `person.reference`; `status.pending_case`, `status.current_supervision`, `status.supervision_ended_within_3_years`, `status.registration_290`, `status.fire_camp`, `status.trafficking_or_dv_remedies`; `program_gates`; every case field except `notes` is used by some rule, and `notes` carries the second completion date; arrests use all four fields. A paste may give the keys in any order; a missing status gate reads as `unsure`, a missing case field as `unknown`. The import step still emits the full record in schema order.
 
 ## Field notes
 
@@ -124,5 +128,7 @@ Names, email addresses, phone numbers, mailing addresses, dates of birth, Social
 The three gate rows above are one program's rules. The practice profile section `## Program eligibility gates` defines the clinic's own gates. The import step records the answers; the screen reports whether the profile's gates are met and never treats a gate as a legal eligibility rule.
 
 ## Versioning
+
+2026-10-04, plugin v0.3: fields no screening rule reads are marked optional; pastes accept keys in any order; no field renamed.
 
 Schema v0.2, 2026-10-04: added `felony_reduced_to_misdemeanor`, `completed_with_violation`, `revocation_custody`, `judgment_date`, `new_conviction_since` for the baseline interview and the PC 1203.4a route. v0.1 records remain valid; missing fields read as `unknown`. Add fields at the end of a block; never rename an existing field without bumping the version and updating both skills.

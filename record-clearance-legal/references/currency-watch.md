@@ -2,7 +2,7 @@
 
 **Last verified: 2026-10-04.**
 
-> **Staleness check.** If the last-verified date above is more than 90 days old, treat this file as stale and verify each entry before relying on it. A stale watch list is worse than no watch list: it looks current while being wrong. When a skill reads this file, check the last-verified date first. If stale, say: "The currency watch was last verified [date], [N] months ago. I'm using it as a checklist of areas to search, not as a source of current status." When you update any entry, also update the last-verified date at the top.
+> **Staleness check.** This file is current until the January 1 after the last-verified date above, because California statutes take effect then; it is stale earlier if an entry below names a pending change whose effective date has passed. A clinic's verification-log entry for this file, if newer, refreshes the date. When stale, treat this file as a checklist of areas to search, not as a source of current status, and say: "The currency watch was last verified [date]. I'm using it as a checklist of areas to search, not as a source of current status." When you update any entry, also update the last-verified date at the top.
 
 Provenance: chapter and section lines marked "leginfo" were read on the Legislature's site on 2026-10-03 during the planning session and are recorded in the statute source files' `leginfo_history_line` header; full texts were otherwise confirmed against the california.public.law mirror on 2026-10-04, whose header shows an "updated" date rather than the chapter line. Treat a public.law date as a date, not as a chapter cite.
 

@@ -1,10 +1,10 @@
-# Relief types the v0.2 screen does not evaluate
+# Relief types the screen does not evaluate
 
-Each card says what the relief is, the key threshold from the statute, why v0.2 does not screen it, and the referral line the report prints. The report names the referral target from the profile's `## Relief types enabled` table. Sources were fetched on 2026-10-04 from california.public.law, a mirror of the code, unless a leginfo fetch is noted; mirror-sourced cards carry `[statute text via public.law mirror, 2026-10-04 — verify at the leginfo link]` rather than the official-source tag. "Partial" means the fetch returned a summary and every pinpoint on that card carries `[verify]`.
+Each card says what the relief is, the key threshold from the statute, why this version does not screen it, and the referral line the report prints. The report names the referral target from the profile's `## Relief types enabled` table. Sources were fetched on 2026-10-04 from california.public.law, a mirror of the code, unless a leginfo fetch is noted; mirror-sourced cards carry `[statute text via public.law mirror, 2026-10-04 — verify at the leginfo link]` rather than the official-source tag. "Partial" means the fetch returned a summary and every pinpoint on that card carries `[verify]`.
 
 ## PC 1203.4a
 
-Screened from v0.2. See `pc-1203-4a.md` and section 3a of `screening-bands.md`.
+Screened. See `pc-1203-4a.md` and section 3a of `screening-bands.md`.
 
 ## PC 1203.4b: dismissal for fire camp, county hand crew and institutional firehouse participants
 

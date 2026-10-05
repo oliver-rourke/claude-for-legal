@@ -39,14 +39,14 @@ Some requests the judge must grant: for example, a conviction where you were giv
 ## Waiting periods in plain words
 
 - Finished probation: you can ask as soon as probation is over (PC 1203.4).
-- A misdemeanor or infraction with no probation: one year after the judgment, if you completed the sentence (PC 1203.4a, screened from v0.2).
+- A misdemeanor or infraction with no probation: one year after the judgment, if you completed the sentence (PC 1203.4a).
 - A felony served in county jail with a split sentence and supervision: one year after you finished the whole sentence (PC 1203.41(a)(2)).
 - A felony served as straight county jail time or in state prison: two years after the sentence is complete (PC 1203.41(a)(2)). Whether that date is release from custody or discharge from parole is a question for the attorney.
 - You cannot be on probation, parole or supervision, serving a sentence, or facing a new charge when you ask (PC 1203.4(a)(1), PC 1203.41(a)(3)).
 
 ## If you are still on probation
 
-You usually have to finish probation first. In some situations a court will end probation early, and the dismissal request can be heard at the same time (PC 1203.3, not screened in v0.2). People who served on a fire camp or county hand crew may qualify for relief without finishing supervision (PC 1203.4b, not screened in v0.2). Both are questions for the attorney.
+You usually have to finish probation first. In some situations a court will end probation early, and the dismissal request can be heard at the same time (PC 1203.3, not screened). People who served on a fire camp or county hand crew may qualify for relief without finishing supervision (PC 1203.4b, not screened). Both are questions for the attorney.
 
 ## Automatic relief
 
